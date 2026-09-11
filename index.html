@@ -69,6 +69,10 @@
     .json-kevin { background:#ec4899; color:#500724; padding:0 3px; border-radius:3px; font-weight:600; }
     pre.json-snip { background:#0d1117; color:#c9d1d9; border-radius:6px; padding:8px 10px; margin:6px 0 0;
       font-size:11px; line-height:1.4; white-space:pre-wrap; word-break:break-word; }
+    .sk-block { border-left:3px solid var(--accent); padding:2px 0 4px 8px; margin:8px 0 0; }
+    .sk-block .sk-label { display:block; font-size:10px; font-weight:700; text-transform:uppercase;
+      letter-spacing:.04em; color:var(--accent); margin-bottom:2px; }
+    .sk-block pre.json-snip { margin-top:4px; }
     .manual-kevin { background:#06b6d4; color:#083344; padding:0 3px; border-radius:3px; font-weight:600; }
     .wide-wrap { overflow-x:auto; margin:16px 0; }
     .wide-wrap table.kevin-wide { min-width:1600px; margin:0; }
@@ -438,7 +442,22 @@ flowchart LR
         <tr><td>Hold Time (member on hold)</td><td><code>hold_duration</code> (0s)</td><td><code>Avg HoldTime</code> (0:00:00), <code>Total Hold Time</code> (0:00:00)</td><td><code>hold_duration</code> (0)</td><td><code>holdDuration</code> (top-level, 0) / <code>handleDurations[].holdDuration</code> (0, null)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Total Hold Time</code> (0:00:00)</td><td><code>hold_duration</code> (0s)</td><td>0s &minus; 0s = 0s &mdash; &#10003; perfect match</td></tr></tbody></table></td></tr>
         <tr><td class="kevin-said">Handle Time = Talk + Work + Hold</td><td>derive (blocked on Work Time)</td><td class="cisco-present"><code>AHT</code> (0:00:00 sample)</td><td><code class="record-kevin">call_duration</code> (251) + <code class="record-kevin">hold_duration</code> (0) + <code class="record-kevin">handle_durations.acw_duration</code> (0, 90)</td><td><code class="json-kevin">callDuration</code> (251) + <code class="json-kevin">holdDuration</code> (0) + <code class="json-kevin">handleDurations[].acwDuration</code> (0, 90)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>AHT</code></td><td>(Talk + Hold + ACW) / CallsHandled</td><td>Matches our derivation once Work Time = <code>acw_duration</code></td></tr></tbody></table></td></tr>
         <tr><td>Agent-Out calls (if available)</td><td><code>call_type</code> (only "Voice Inbound (IVR)" seen &mdash; confirm outbound value)</td><td><code>AgentOut Calls</code> (0), <code>AgentOut Calls TalkTime</code> (0:00:00)</td><td><code>call_type</code> (Voice Inbound (IVR))</td><td><code>callType</code> (Voice Inbound (IVR))</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>AgentOut Calls</code> (0)</td><td>&mdash; (no field named)</td><td>Listed alongside <code>TransferOut</code> in the Transfers &amp; Escalations domain; no dedicated CCAI table field named</td></tr></tbody></table></td></tr>
-        <tr><td class="kevin-said">Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td class="cisco-present"><code>TransferIn</code> (0), <code>TransferOut</code> (0)</td><td><code class="record-kevin">transfers_count</code> (0), <code class="record-kevin">handle_durations.transfer</code> (false, false)</td><td><code class="json-kevin">transfers[]</code> (empty &mdash; HA&rarr;HA) vs <code class="json-kevin">escalations[]</code> (1 entry &mdash; VA&rarr;HA, <code>createdAt</code> 16:08:10 &rarr; <code>escalatedAt</code> 16:08:41 = 31s) vs <code class="json-kevin">handleDurations[].transfer</code> (false, false). Real escalation/transfer ID: <code>escalations[0].id</code> = <strong>5849</strong>; <code>handleDurations[].transferId</code> = <code>null</code> (both legs, since <code>transfer</code> is false)<pre class="json-snip">"transfers": [],
+        <tr><td class="kevin-said">Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td class="cisco-present"><code>TransferIn</code> (0), <code>TransferOut</code> (0)<div class="sk-block"><span class="sk-label">session_key: call-12175</span><pre class="json-snip">TransferIn: 0
+TransferOut: 0
+AgentID: 31 (no per-transfer name field exists in
+  Cisco's Agent-Detail export -- only aggregate counters;
+  no comm_transfers-style from/to record is available for
+  this call since Cisco doesn't track call-12175 at all)</pre></div></td><td><code class="record-kevin">transfers_count</code> (0), <code class="record-kevin">handle_durations.transfer</code> (false, false)<div class="sk-block"><span class="sk-label">session_key: call-12175</span><pre class="json-snip">participants_json[2]:
+  id: 23804
+  type: "agent"
+  entry_type: "queue_or_transfer"
+  user_id: 31
+  first_name: "Chandrika"
+  last_name: "Veerkar"
+  status: "finished"
+
+handle_durations[0].transfer: false
+handle_durations[1].transfer: false</pre></div></td><td><code class="json-kevin">transfers[]</code> (empty &mdash; HA&rarr;HA) vs <code class="json-kevin">escalations[]</code> (1 entry &mdash; VA&rarr;HA, <code>createdAt</code> 16:08:10 &rarr; <code>escalatedAt</code> 16:08:41 = 31s) vs <code class="json-kevin">handleDurations[].transfer</code> (false, false). Real escalation/transfer ID: <code>escalations[0].id</code> = <strong>5849</strong>; <code>handleDurations[].transferId</code> = <code>null</code> (both legs, since <code>transfer</code> is false)<div class="sk-block"><span class="sk-label">session_key: call-12175</span><pre class="json-snip">"transfers": [],
 "escalations": [{
   "id": 5849,
   "status": "escalated",
@@ -448,10 +467,16 @@ flowchart LR
   "fromVirtualAgent": {"id": 12, "name": "QAT-Voice-Member-Self-Service"},
   "toAgent": {"id": 31, "name": "Chandrika Veerkar"}
 }]
+"participants": [
+  {"id": 23804, "type": "agent", "entryType": "queue_or_transfer",
+   "userId": 31, "firstName": "Chandrika", "lastName": "Veerkar"}
+]
 "handleDurations": [
   {"id": 3580, "transfer": false, "transferId": null},
   {"id": 3581, "transfer": false, "transferId": null}
-]</pre></td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>TransferIn</code> + <code>TransferOut</code> = 0</td><td><code>finish_reason_1</code> = escalated = 1</td><td>1 &minus; 0 = <strong>+1 CCAI Escalation, &#9888; variance</strong> &mdash; bot escalation not counted as a Cisco transfer; <code>comm_transfers</code> only covers human-to-human, not VA&rarr;HA</td></tr></tbody></table></td></tr>
+]</pre></div></td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>TransferIn</code> + <code>TransferOut</code> = 0<br>no named party on either leg</td><td><code>finish_reason_1</code> = escalated = 1<br>VA &ldquo;QAT-Voice-Member-Self-Service&rdquo; &rarr; Agent &ldquo;Chandrika Veerkar&rdquo;</td><td>1 &minus; 0 = <strong>+1 CCAI Escalation, &#9888; variance</strong> &mdash; bot escalation not counted as a Cisco transfer; <code>comm_transfers</code> only covers human-to-human, not VA&rarr;HA</td></tr></tbody></table><div class="sk-block"><span class="sk-label">session_key: call-12175</span><pre class="json-snip">Cisco: TransferIn=0, TransferOut=0 (no name)
+CCAI:  escalations[0].fromVirtualAgent.name = "QAT-Voice-Member-Self-Service"
+       escalations[0].toAgent.name          = "Chandrika Veerkar"</pre></div></td></tr>
         <tr><td>Logged-In / Available / Not-Ready (low value)</td><td class="todo">not in table &mdash; agent-state feed only</td><td><code>Total Logged In Time</code>, <code>Available Time</code>, <code>Not Ready Time</code></td><td class="todo">none</td><td class="todo">not in JSON</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Available Time</code>, <code>Not Ready Time</code>, <code>Total Logged In Time</code></td><td><code>user_activity_logs</code> + <code>user_statuses</code> (status=Available/Break/etc.)</td><td>The manual doc DOES map this, even though <code>metadata_current</code> doesn&rsquo;t &mdash; needs the separate agent-state tables it names</td></tr></tbody></table></td></tr>
         <tr><td>RONA / redirect-on-no-answer (misc)</td><td class="todo">not in metadata &mdash; maybe <code>session_data_feeds</code> events</td><td><code>RONA</code></td><td class="todo">none</td><td class="todo">not in JSON</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>RONA</code> (summed counter)</td><td>&mdash; (no source table named)</td><td>No CCAI-side source named in the manual doc either</td></tr></tbody></table></td></tr>
       </tbody>
