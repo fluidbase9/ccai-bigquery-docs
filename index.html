@@ -356,7 +356,7 @@ flowchart LR
     <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
-        <tr><td class="kevin-said">Queue</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code class="kevin-said">selected_menu_id</code>, <code class="kevin-said">selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code class="kevin-said">PQ ID</code>, <code class="kevin-said">PQ Name</code></td></tr>
         <tr><td class="kevin-said">Time interval</td><td><code>queued_at</code> (floor to 15 min) &mdash; also <code>assigned_at</code> / <code>created_at</code></td><td><code>Time Interval</code>, <code>Hour</code></td></tr>
         <tr><td>Date</td><td><code>DATE(queued_at)</code></td><td><code>Date</code>, <code>Week</code></td></tr>
       </tbody>
@@ -382,8 +382,8 @@ flowchart LR
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Time interval</td><td><code>assigned_at</code> / <code>connected_at</code> (floor to 15 min)</td><td><code>Time Interval</code>, <code>Hour</code>, <code>Date</code></td></tr>
-        <tr><td class="kevin-said">Queue</td><td><code>selected_menu_name</code> / <code>menu_path_name</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
-        <tr><td class="kevin-said">Agent (the person)</td><td><code>agent_info_id</code> (31), <code>agent_info_name</code> ("Chandrika Veerkar")</td><td><code>Agent</code>, <code>AgentID</code>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
+        <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code class="kevin-said">selected_menu_name</code> / <code>menu_path_name</code></td><td><code class="kevin-said">PQ ID</code>, <code class="kevin-said">PQ Name</code></td></tr>
+        <tr><td class="kevin-said">Agent ID / Agent Name</td><td><code class="kevin-said">agent_info_id</code> (31), <code class="kevin-said">agent_info_name</code> ("Chandrika Veerkar")</td><td><code class="kevin-said">Agent</code>, <code class="kevin-said">AgentID</code>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
       </tbody>
     </table>
 
