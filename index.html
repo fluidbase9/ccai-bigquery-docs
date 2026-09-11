@@ -376,7 +376,8 @@ flowchart LR
     HA&rarr;HA transfer time (structure unconfirmed &mdash; no sample record with a human-to-human transfer yet).</p></div>
 
     <h4>A. Queue report &mdash; dimensions</h4>
-    <table>
+    <div class="wide-wrap">
+    <table class="kevin-wide">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th><th>GCS BigQuery column</th><th>CCAI (JSON data)</th><th>Manual mapping (Cisco&harr;CCAI CSV doc)</th></tr></thead>
       <tbody>
         <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td class="cisco-present"><code>PQ ID</code> (5059), <code>PQ Name</code> (US_BD)</td><td><code class="record-kevin">selected_menu_id</code> (8), <code class="record-kevin">selected_menu_name</code> (US_ECOMM_General_CB)</td><td><code class="json-kevin">selectedMenu.id</code> (8), <code class="json-kevin">selectedMenu.name</code> (US_ECOMM_General_CB)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>PQ Name</code> (US_MS_SCB), <code>PQ ID</code> (5137), Team Name US_OKC_EC15 (Table 1 row 1)</td><td><code>menu_path</code> leaf segment (US_MS_General_CB), <code>selected_menu</code> (US_MS_General_CB)</td><td>Names don&rsquo;t match 1:1 &mdash; only the LOB/category segment does (Membership &rarr; MSUS)</td></tr></tbody></table></td></tr>
@@ -384,9 +385,11 @@ flowchart LR
         <tr><td>Date</td><td><code>DATE(queued_at)</code></td><td><code>Date</code> (07/14/2026), <code>Week</code></td><td><code>queued_at</code> (2026-09-04 16:08:14 UTC)</td><td><code>queuedAt</code> (2026-09-04T16:08:14.000Z)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Date</code> (07/14/2026)</td><td><code>startTime</code> / <code>createTime</code></td><td>Same source pair as Time interval row above</td></tr></tbody></table></td></tr>
       </tbody>
     </table>
+    </div>
 
     <h4>B. Queue report &mdash; measures ("the big five" + 2)</h4>
-    <table>
+    <div class="wide-wrap">
+    <table class="kevin-wide">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th><th>GCS BigQuery column</th><th>CCAI (JSON data)</th><th>Manual mapping (Cisco&harr;CCAI CSV doc)</th></tr></thead>
       <tbody>
         <tr><td class="kevin-said">Offered (calls coming in)</td><td>derive: <code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td><td><code class="record-kevin">queued_at</code> (2026-09-04 16:08:14 UTC)</td><td><code class="json-kevin">queuedAt</code> (2026-09-04T16:08:14.000Z)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td>&mdash; (no field named)</td><td><code>COUNT(calls.id)</code> &rarr; <code>total_calls_offered</code> (SQL, Table 5 &sect;2)</td><td>No direct Cisco equivalent named anywhere in the manual doc</td></tr></tbody></table></td></tr>
@@ -399,9 +402,11 @@ flowchart LR
         <tr><td>Abandon &lt;30s buckets / abandoned-by (collected, not critical)</td><td><code>disconnected_by</code> + wait math</td><td>partial: <code>Abandoned Hold Calls</code> (0)</td><td><code>disconnected_by</code> (disconnected_by_end_user)</td><td><code>disconnectedBy</code> (disconnected_by_end_user)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td>&mdash;</td><td>&mdash;</td><td>Not covered in the manual-mapping doc</td></tr></tbody></table></td></tr>
       </tbody>
     </table>
+    </div>
 
     <h4>C. Agent report &mdash; dimensions</h4>
-    <table>
+    <div class="wide-wrap">
+    <table class="kevin-wide">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th><th>GCS BigQuery column</th><th>CCAI (JSON data)</th><th>Manual mapping (Cisco&harr;CCAI CSV doc)</th></tr></thead>
       <tbody>
         <tr><td>Time interval</td><td><code>assigned_at</code> / <code>connected_at</code> (floor to 15 min)</td><td><code>Time Interval</code> (5:45:00), <code>Hour</code> (5), <code>Date</code> (07/14/2026)</td><td><code>assigned_at</code> (2026-09-04 16:08:30 UTC)</td><td><code>assignedAt</code> (2026-09-04T16:08:30.000Z)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Date</code>/<code>Hour</code>/<code>Time Interval</code></td><td><code>startTime</code>/<code>createTime</code></td><td>Same timestamp mapping as table A</td></tr></tbody></table></td></tr>
@@ -409,9 +414,11 @@ flowchart LR
         <tr><td class="kevin-said">Agent ID / Agent Name</td><td><code>agent_info_id</code> (31), <code>agent_info_name</code> ("Chandrika Veerkar")</td><td><span class="cisco-present"><code>Agent</code> (Elizabeth_Pinon), <code>AgentID</code> (8748)</span>, <code>Team Name</code> (US_YAK_MS7), <code>PeripheralNumber</code> (623040)</td><td><code class="record-kevin">agent_info_id</code> (31), <code class="record-kevin">agent_info_name</code> (Chandrika Veerkar)</td><td><code class="json-kevin">agentInfo.id</code> (31), <code class="json-kevin">agentInfo.name</code> (Chandrika Veerkar)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Agent</code> (Elizabeth_Pinon), <code>AgentID</code> (8748)</td><td>BOT <code>agentName</code> (QAT-Voice-Member-Self-Service), <code>agentType</code> (AUTOMATED_AGENT) &mdash; HUMAN <code>qualityMetadata.displayName</code> (Farhan Hussain), <code>qualityMetadata.agentId</code> (2)</td><td>CCAI record carries two agent identities (bot + human); only the human one maps to Cisco Agent/AgentID (Table 0)</td></tr></tbody></table></td></tr>
       </tbody>
     </table>
+    </div>
 
     <h4>D. Agent report &mdash; measures</h4>
-    <table>
+    <div class="wide-wrap">
+    <table class="kevin-wide">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th><th>GCS BigQuery column</th><th>CCAI (JSON data)</th><th>Manual mapping (Cisco&harr;CCAI CSV doc)</th></tr></thead>
       <tbody>
         <tr><td class="kevin-said">Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td class="cisco-present"><code>Calls Answered</code> (0 sample / 1 real row), <code>CallsHandled</code> (1)</td><td><code class="record-kevin">id</code> (12175), <code class="record-kevin">connected_at</code> (2026-09-04 16:05:53 UTC)</td><td><code class="json-kevin">id</code> (12175), <code class="json-kevin">connectedAt</code> (2026-09-04T16:05:53.000Z)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>SUM(Calls Answered)</code> = 1</td><td><code>COUNT(status=&#39;finished&#39;)</code> = 1</td><td>1 &minus; 1 = 0 &mdash; &#10003; perfect match</td></tr></tbody></table></td></tr>
@@ -425,9 +432,11 @@ flowchart LR
         <tr><td>RONA / redirect-on-no-answer (misc)</td><td class="todo">not in metadata &mdash; maybe <code>session_data_feeds</code> events</td><td><code>RONA</code></td><td class="todo">none</td><td class="todo">not in JSON</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>RONA</code> (summed counter)</td><td>&mdash; (no source table named)</td><td>No CCAI-side source named in the manual doc either</td></tr></tbody></table></td></tr>
       </tbody>
     </table>
+    </div>
 
     <h4 class="kevin-said">E. Virtual-agent performance (Kevin wants this included, voice + chat)</h4>
-    <table>
+    <div class="wide-wrap">
+    <table class="kevin-wide">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th><th>GCS BigQuery column</th><th>CCAI (JSON data)</th><th>Manual mapping (Cisco&harr;CCAI CSV doc)</th></tr></thead>
       <tbody>
         <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td class="todo">not represented</td><td><code class="record-kevin">participants_json</code> (1 of 3 entries type=virtual_agent), <code class="record-kevin">channel</code> (call)</td><td><code class="json-kevin">participants[].type == "virtual_agent"</code> (entry id 23803), <code class="json-kevin">virtualAgent</code> (id 12, "QAT-Voice-Member-Self-Service")</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Source</code> (IVR)</td><td><code>agentType</code> (AUTOMATED_AGENT), <code>va_count</code> (1)</td><td>Cisco does not manage virtual bot turns &mdash; only sees bot routing as incoming IVR traffic</td></tr></tbody></table></td></tr>
@@ -436,9 +445,11 @@ flowchart LR
         <tr><td>Self-service MSA vs FAQ-bot split</td><td class="todo"><code>menu_path</code> / sub-agent name / <code>raw_json</code> &mdash; field TBD</td><td class="todo">not represented</td><td class="todo">TBD</td><td class="todo">not found &mdash; <code>virtualAgent.name</code> ("QAT-Voice-Member-Self-Service") is the closest signal but isn't a clean MSA/FAQ flag</td><td class="todo">not covered in the manual-mapping doc either &mdash; genuine open gap on both sides</td></tr>
       </tbody>
     </table>
+    </div>
 
     <h4>F. Grain, keys &amp; PII</h4>
-    <table>
+    <div class="wide-wrap">
+    <table class="kevin-wide">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th><th>GCS BigQuery column</th><th>CCAI (JSON data)</th><th>Manual mapping (Cisco&harr;CCAI CSV doc)</th></tr></thead>
       <tbody>
         <tr><td>Stable interaction ID (distinct-call count)</td><td><code>id</code> (12175), <code>session_key</code> ("call-12175"), <code>call_uuid</code>, <code>provider_conversation_id</code></td><td><code>Unique ID</code> (Daily_Agent_29_20260714-0545_BDUS_5059_8748)</td><td><code>id</code> (12175), <code>session_key</code> (call-12175)</td><td><code>id</code> (12175), <code>callUuid</code> (57272f16-15c2-4cac-b4b4-ca261bd8ef49)</td><td><table class="manual-mini"><thead><tr><th>Cisco</th><th>CCAI</th><th>Note</th></tr></thead><tbody><tr><td><code>Unique ID</code> (Daily_Agent_29_20260714-0545_BDUS_5059_8748)</td><td><code>conversationId</code> (call-11903), <code>id</code> (11903), <code>dialogflow_conversation_id_1</code></td><td>Cisco Unique ID is a composite string, not a shared key</td></tr></tbody></table></td></tr>
@@ -450,6 +461,7 @@ flowchart LR
         <tr><td>Keep support-line number</td><td><code>support_number</code> (+18153935508)</td><td class="todo">n/a</td><td><code>support_number</code> (+18153935508)</td><td><code>supportNumber</code> (+18153935508)</td><td class="todo">not covered in the manual-mapping doc</td></tr>
       </tbody>
     </table>
+    </div>
 
     <h3>Cross-cutting requirements</h3>
     <ul>
