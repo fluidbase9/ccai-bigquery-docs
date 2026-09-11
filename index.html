@@ -63,6 +63,8 @@
     .diagram .mermaid { font-size:13px; }
     .kevin-said { background:#dcfce7; color:#14532d; padding:0 3px; border-radius:3px; }
     td.kevin-said, h4.kevin-said { font-weight:600; padding:7px 11px; }
+    .cisco-present { background:#ffedd5; color:#7c2d12; padding:0 3px; border-radius:3px; }
+    td.cisco-present { font-weight:600; padding:7px 11px; }
     @media (max-width:900px){ nav.toc{display:none;} main{padding:24px;} }
   </style>
 </head>
@@ -356,8 +358,8 @@ flowchart LR
     <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
-        <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code class="kevin-said">selected_menu_id</code>, <code class="kevin-said">selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code class="kevin-said">PQ ID</code>, <code class="kevin-said">PQ Name</code></td></tr>
-        <tr><td class="kevin-said">Time interval</td><td><code>queued_at</code> (floor to 15 min) &mdash; also <code>assigned_at</code> / <code>created_at</code></td><td><code>Time Interval</code>, <code>Hour</code></td></tr>
+        <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td class="cisco-present"><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td class="kevin-said">Time interval</td><td><code>queued_at</code> (floor to 15 min) &mdash; also <code>assigned_at</code> / <code>created_at</code></td><td class="cisco-present"><code>Time Interval</code>, <code>Hour</code></td></tr>
         <tr><td>Date</td><td><code>DATE(queued_at)</code></td><td><code>Date</code>, <code>Week</code></td></tr>
       </tbody>
     </table>
@@ -368,7 +370,7 @@ flowchart LR
       <tbody>
         <tr><td class="kevin-said">Offered (calls coming in)</td><td>derive: <code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
         <tr><td>Answered (to an agent)</td><td>derive: <code>COUNTIF(assigned_at IS NOT NULL)</code> / <code>agent_info_id</code> set</td><td><code>Calls Answered</code></td></tr>
-        <tr><td class="kevin-said">Abandoned (offered &minus; answered)</td><td>derive: <code>queued_at IS NOT NULL AND assigned_at IS NULL</code></td><td><code>CallsAbandoned</code></td></tr>
+        <tr><td class="kevin-said">Abandoned (offered &minus; answered)</td><td>derive: <code>queued_at IS NOT NULL AND assigned_at IS NULL</code></td><td class="cisco-present"><code>CallsAbandoned</code></td></tr>
         <tr><td class="kevin-said">Service Level (% answered within threshold)</td><td>derive: <code>COUNTIF((assigned_at - queued_at) &lt;= threshold) / COUNTIF(answered)</code> &mdash; threshold TBD</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
         <tr><td class="kevin-said">ASA (avg speed of answer)</td><td>derive: <code>AVG(assigned_at - queued_at)</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
         <tr><td class="kevin-said">Longest wait time (interval)</td><td>derive: <code>MAX(assigned_at - queued_at)</code> over answered</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
@@ -382,8 +384,8 @@ flowchart LR
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Time interval</td><td><code>assigned_at</code> / <code>connected_at</code> (floor to 15 min)</td><td><code>Time Interval</code>, <code>Hour</code>, <code>Date</code></td></tr>
-        <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code class="kevin-said">selected_menu_name</code> / <code>menu_path_name</code></td><td><code class="kevin-said">PQ ID</code>, <code class="kevin-said">PQ Name</code></td></tr>
-        <tr><td class="kevin-said">Agent ID / Agent Name</td><td><code class="kevin-said">agent_info_id</code> (31), <code class="kevin-said">agent_info_name</code> ("Chandrika Veerkar")</td><td><code class="kevin-said">Agent</code>, <code class="kevin-said">AgentID</code>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
+        <tr><td class="kevin-said">Queue ID / Queue Name</td><td><code>selected_menu_name</code> / <code>menu_path_name</code></td><td class="cisco-present"><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td class="kevin-said">Agent ID / Agent Name</td><td><code>agent_info_id</code> (31), <code>agent_info_name</code> ("Chandrika Veerkar")</td><td><span class="cisco-present"><code>Agent</code>, <code>AgentID</code></span>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
       </tbody>
     </table>
 
@@ -391,13 +393,13 @@ flowchart LR
     <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
-        <tr><td class="kevin-said">Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td><code>Calls Answered</code>, <code>CallsHandled</code></td></tr>
-        <tr><td class="kevin-said">Talk Time (on phone with member)</td><td><code>call_duration</code> (251s) &mdash; or <code>consumer_handle_durations_json.call_duration</code> (216s), confirm which</td><td><code>Avg Talktime</code>, <code>Total Talk Time</code></td></tr>
-        <tr><td class="kevin-said">Work Time (after-call wrap-up)</td><td class="todo">no dedicated column &mdash; candidate: <code>updated_at</code> &minus; <code>ends_at</code> (93s in sample)</td><td><code>Avg WorkTime</code>, <code>Total Work Time</code></td></tr>
+        <tr><td class="kevin-said">Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td class="cisco-present"><code>Calls Answered</code>, <code>CallsHandled</code></td></tr>
+        <tr><td class="kevin-said">Talk Time (on phone with member)</td><td><code>call_duration</code> (251s) &mdash; or <code>consumer_handle_durations_json.call_duration</code> (216s), confirm which</td><td class="cisco-present"><code>Avg Talktime</code>, <code>Total Talk Time</code></td></tr>
+        <tr><td class="kevin-said">Work Time (after-call wrap-up)</td><td class="todo">no dedicated column &mdash; candidate: <code>updated_at</code> &minus; <code>ends_at</code> (93s in sample)</td><td class="cisco-present"><code>Avg WorkTime</code>, <code>Total Work Time</code></td></tr>
         <tr><td>Hold Time (member on hold)</td><td><code>hold_duration</code> (0s)</td><td><code>Avg HoldTime</code>, <code>Total Hold Time</code></td></tr>
-        <tr><td class="kevin-said">Handle Time = Talk + Work + Hold</td><td>derive (blocked on Work Time)</td><td><code>AHT</code></td></tr>
+        <tr><td class="kevin-said">Handle Time = Talk + Work + Hold</td><td>derive (blocked on Work Time)</td><td class="cisco-present"><code>AHT</code></td></tr>
         <tr><td>Agent-Out calls (if available)</td><td><code>call_type</code> (only "Voice Inbound (IVR)" seen &mdash; confirm outbound value)</td><td><code>AgentOut Calls</code>, <code>AgentOut Calls TalkTime</code></td></tr>
-        <tr><td class="kevin-said">Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td><code>TransferIn</code>, <code>TransferOut</code></td></tr>
+        <tr><td class="kevin-said">Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td class="cisco-present"><code>TransferIn</code>, <code>TransferOut</code></td></tr>
         <tr><td>Logged-In / Available / Not-Ready (low value)</td><td class="todo">not in table &mdash; agent-state feed only</td><td><code>Total Logged In Time</code>, <code>Available Time</code>, <code>Not Ready Time</code></td></tr>
         <tr><td>RONA / redirect-on-no-answer (misc)</td><td class="todo">not in metadata &mdash; maybe <code>session_data_feeds</code> events</td><td><code>RONA</code></td></tr>
       </tbody>
