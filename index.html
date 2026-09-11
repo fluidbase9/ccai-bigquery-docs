@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BigQuery &rarr; Cisco Webex Contact Center Mapping</title>
+  <style>
+    :root {
+      --bg:#ffffff; --fg:#1a1a1a; --muted:#5b6470; --border:#e5e7eb;
+      --code-bg:#f6f8fa; --accent:#2563eb; --ok:#16a34a; --warn:#b45309;
+      --sidebar-w:260px;
+    }
+    * { box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      line-height:1.65; color:var(--fg); background:var(--bg); margin:0; }
+    a { color:var(--accent); }
+    .wrap { display:flex; max-width:1240px; margin:0 auto; }
+    nav.toc { width:var(--sidebar-w); flex:0 0 var(--sidebar-w); position:sticky; top:0;
+      align-self:flex-start; height:100vh; overflow-y:auto; padding:28px 16px;
+      border-right:1px solid var(--border); font-size:13.5px; }
+    nav.toc h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:18px 0 8px; }
+    nav.toc h2:first-child { margin-top:0; }
+    nav.toc a { display:block; padding:3px 8px; border-radius:6px; text-decoration:none; color:var(--fg); }
+    nav.toc a:hover { background:var(--code-bg); }
+    main { flex:1; min-width:0; padding:40px 48px 120px; }
+    h1 { margin-top:0; font-size:30px; }
+    h2 { margin-top:2.6em; padding-bottom:.3em; border-bottom:1px solid var(--border); font-size:22px; }
+    h3 { margin-top:1.8em; font-size:17px; }
+    h4 { margin:1.4em 0 .4em; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+    p.lead { color:var(--muted); font-size:17px; }
+    .step { display:inline-block; background:var(--accent); color:#fff; font-size:12px; font-weight:600;
+      padding:2px 9px; border-radius:999px; margin-right:8px; vertical-align:middle; }
+    .callout { border-left:4px solid var(--accent); background:#eff5ff; padding:12px 16px; border-radius:6px; margin:16px 0; }
+    .callout.warn { border-color:var(--warn); background:#fff7ed; }
+    .callout.ok { border-color:var(--ok); background:#f0fdf4; }
+    .callout p { margin:.3em 0; }
+
+    .code-block { position:relative; margin:16px 0; }
+    .code-block pre { background:var(--code-bg); border:1px solid var(--border); border-radius:8px;
+      padding:16px 44px 16px 16px; overflow-x:auto; font-size:13px; line-height:1.5; }
+    .code-block code { font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; white-space:pre; }
+    .code-block .lang { position:absolute; top:8px; right:44px; font-size:11px; text-transform:uppercase;
+      letter-spacing:.06em; color:var(--muted); }
+    .copy-btn { position:absolute; top:8px; right:8px; width:28px; height:28px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center; background:var(--bg);
+      border:1px solid var(--border); border-radius:6px; cursor:pointer; color:var(--muted); }
+    .copy-btn:hover { color:var(--fg); background:var(--code-bg); }
+    .copy-btn.copied { color:var(--ok); border-color:var(--ok); }
+    .copy-btn svg { width:15px; height:15px; }
+    .out { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:14px 0 4px; }
+    .code-block.output pre { background:#0d1117; color:#c9d1d9; border-color:#0d1117; }
+
+    p code, li code, td code { background:var(--code-bg); border:1px solid var(--border);
+      padding:1px 5px; border-radius:4px; font-size:85%;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    table { border-collapse:collapse; width:100%; margin:16px 0; font-size:13.5px; }
+    th,td { border:1px solid var(--border); padding:7px 11px; text-align:left; vertical-align:top; }
+    th { background:var(--code-bg); }
+    td.todo { color:var(--muted); font-style:italic; }
+    .diagram { border:1px solid var(--border); border-radius:8px; padding:20px; margin:16px 0;
+      overflow:auto; background:#fff; }
+    .diagram .mermaid svg { max-width:100%; height:auto; max-height:520px; }
+    .diagram .mermaid { font-size:13px; }
+    @media (max-width:900px){ nav.toc{display:none;} main{padding:24px;} }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="toc">
+    <h2>Background</h2>
+    <a href="#overview">1. Overview</a>
+    <a href="#architecture">2. Flow</a>
+    <a href="#environments">3. Environments &amp; references</a>
+    <a href="#conventions">4. Mapping conventions</a>
+    <h2>Cisco report</h2>
+    <a href="#cisco-report">5. Report fields (Agent-Detail)</a>
+    <a href="#metadata-current">5b. metadata_current columns</a>
+    <a href="#map-query-to-cisco">6. metadata_current &rarr; report field</a>
+    <a href="#requirements">6c. Kevin's requirements</a>
+    <a href="#kevin-wants">&nbsp;&nbsp;&rarr; What Kevin wants (3-col)</a>
+    <h2>Field maps</h2>
+    <a href="#map-metadata">7. metadata &rarr; Webex CC</a>
+    <a href="#map-session-feeds">8. session_data_feeds &rarr; Webex CC</a>
+    <a href="#map-ujet">9. ujet_session_summaries &rarr; Webex CC</a>
+    <h2>Reference</h2>
+    <a href="#value-maps">Value / enum maps</a>
+    <a href="#transforms">Transform rules</a>
+    <a href="#open-questions">Open questions</a>
+  </nav>
+
+  <main>
+    <h1>BigQuery &rarr; Cisco Webex Contact Center Mapping</h1>
+    <p class="lead">Field-level mapping from the flattened <code>ccaas_raw_lab</code> BigQuery tables (output of the
+    <a href="index.html">CCAI &rarr; BigQuery pipeline</a>) to the Cisco Webex Contact Center schema. This page is a
+    <strong>scaffold</strong> &mdash; structure and styling are in place; the mapping rows are placeholders to be filled in.</p>
+    <div class="callout warn"><p><strong>Draft.</strong> Every <span class="todo">TBD</span> cell below needs a real
+    source column, target field, and transform. Do not treat any row as authoritative yet.</p></div>
+
+    <!-- ================================================================ -->
+    <h2 id="overview">1. Overview</h2>
+    <p>Purpose: define how each column in the query-ready BigQuery tables lands in Cisco Webex Contact Center
+    (and/or Webex CC Analyzer / the Reporting &amp; Analytics data model), so the CCAI/UJET POC data can be
+    reconciled against or loaded into Webex CC.</p>
+    <ul>
+      <li><strong>Source of truth:</strong> <code>p-640-lab-itmsc.ccaas_raw_lab.metadata</code>,
+      <code>&hellip;.session_data_feeds</code>, <code>&hellip;.ujet_session_summaries</code>.</li>
+      <li><strong>Target:</strong> Cisco Webex Contact Center &mdash; <span class="todo">TBD: exact object(s) / API / dataset</span>.</li>
+      <li><strong>Direction:</strong> <span class="todo">TBD (one-way BQ&rarr;Webex, or reconciliation only)</span>.</li>
+      <li><strong>Grain:</strong> <span class="todo">TBD (per contact / per session / per activity leg)</span>.</li>
+    </ul>
+
+    <!-- ================================================================ -->
+    <h2 id="architecture">2. Flow</h2>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart LR
+    BQ["ccaas_raw_lab (BigQuery)\nmetadata / session_data_feeds / ujet_session_summaries"]
+    T["Transform / mapping layer\n(TBD: SQL view, dbt, script)"]
+    WX["Cisco Webex Contact Center\n(TBD: API / import / Analyzer model)"]
+    BQ --> T --> WX
+      </pre>
+    </div>
+
+    <!-- ================================================================ -->
+    <h2 id="environments">3. Environments &amp; references</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Source (BigQuery)</th><th>Target (Cisco Webex CC)</th></tr></thead>
+      <tbody>
+        <tr><td>Project / org</td><td><code>p-640-lab-itmsc</code></td><td class="todo">TBD Webex org ID</td></tr>
+        <tr><td>Dataset / object</td><td><code>ccaas_raw_lab</code></td><td class="todo">TBD</td></tr>
+        <tr><td>Access</td><td><code>roles/bigquery.dataViewer</code></td><td class="todo">TBD (Control Hub / API token)</td></tr>
+        <tr><td>Docs</td><td><a href="index.html">Pipeline runbook</a></td><td class="todo">TBD link to Webex CC schema docs</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="conventions">4. Mapping conventions</h2>
+    <ul>
+      <li><strong>Source column</strong> &mdash; exact column name in the flat BigQuery table.</li>
+      <li><strong>Target field</strong> &mdash; Webex CC field / attribute name.</li>
+      <li><strong>Transform</strong> &mdash; <code>direct</code>, <code>cast</code>, <code>lookup</code>,
+      <code>concat</code>, <code>derive</code>, or a short expression.</li>
+      <li><strong>Notes</strong> &mdash; nullability, cardinality, known gaps.</li>
+      <li>Use <span class="todo">TBD</span> for anything not yet confirmed.</li>
+    </ul>
+
+    <!-- ================================================================ -->
+    <h2 id="cisco-report">5. Cisco report fields &mdash; SummaryDaily Reports (Agent-Detail)</h2>
+    <p>Target Excel/Sheets export: <code>SummaryDaily Reports(Agent-Detail)</code>. 33 columns, one row per
+    agent &times; time interval. Column letters are the spreadsheet positions.</p>
+    <table>
+      <thead><tr><th>#</th><th>Col</th><th>Field</th><th>Kind</th><th>Sample</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>A</td><td><code>LOB</code></td><td>dim</td><td>BDUS</td><td>line of business</td></tr>
+        <tr><td>2</td><td>B</td><td><code>Week</code></td><td>dim</td><td>29</td><td>ISO week number</td></tr>
+        <tr><td>3</td><td>C</td><td><code>Date</code></td><td>dim</td><td>07/14/2026</td><td>MM/DD/YYYY</td></tr>
+        <tr><td>4</td><td>D</td><td><code>PQ ID</code></td><td>dim</td><td>5059</td><td>precision queue ID</td></tr>
+        <tr><td>5</td><td>E</td><td><code>PQ Name</code></td><td>dim</td><td>US_BD</td><td>precision queue name</td></tr>
+        <tr><td>6</td><td>F</td><td><code>Team Name</code></td><td>dim</td><td>US_YAK_MS7</td><td class="todo">TBD</td></tr>
+        <tr><td>7</td><td>G</td><td><code>Agent</code></td><td>dim</td><td>Elizabeth_Pinon</td><td>First_Last</td></tr>
+        <tr><td>8</td><td>H</td><td><code>Hour</code></td><td>dim</td><td>5</td><td>hour of day (0&ndash;23)</td></tr>
+        <tr><td>9</td><td>I</td><td><code>Time Interval</code></td><td>dim</td><td>5:45:00</td><td>15-min interval start</td></tr>
+        <tr><td>10</td><td>J</td><td><code>Unique ID</code></td><td>key</td><td>Daily_Agent_29_20260714-0545_BDUS_5059_8748</td><td>Period_Source_Week_YYYYMMDD-HHMM_LOB_PQID_AgentID</td></tr>
+        <tr><td>11</td><td>K</td><td><code>Period</code></td><td>dim</td><td>Daily</td><td>grain label</td></tr>
+        <tr><td>12</td><td>L</td><td><code>Source</code></td><td>dim</td><td>Agent</td><td class="todo">TBD</td></tr>
+        <tr><td>13</td><td>M</td><td><code>AgentID</code></td><td>key</td><td>8748</td><td>Cisco agent ID</td></tr>
+        <tr><td>14</td><td>N</td><td><code>PeripheralNumber</code></td><td>key</td><td>623040</td><td>peripheral / login ID</td></tr>
+        <tr><td>15</td><td>O</td><td><code>AgentOut Calls</code></td><td>measure</td><td>0</td><td>count</td></tr>
+        <tr><td>16</td><td>P</td><td><code>AgentOut Calls TalkTime</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
+        <tr><td>17</td><td>Q</td><td><code>Calls Answered</code></td><td>measure</td><td>0</td><td>count</td></tr>
+        <tr><td>18</td><td>R</td><td><code>CallsAbandoned</code></td><td>measure</td><td>0</td><td>count</td></tr>
+        <tr><td>19</td><td>S</td><td><code>Avg Talktime</code></td><td>measure</td><td>0:02:22</td><td>HH:MM:SS</td></tr>
+        <tr><td>20</td><td>T</td><td><code>Avg WorkTime</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
+        <tr><td>21</td><td>U</td><td><code>Avg HoldTime</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
+        <tr><td>22</td><td>V</td><td><code>AHT</code></td><td>measure</td><td>0:00:00</td><td>avg handle time</td></tr>
+        <tr><td>23</td><td>W</td><td><code>TransferIn</code></td><td>measure</td><td>0</td><td>count</td></tr>
+        <tr><td>24</td><td>X</td><td><code>TransferOut</code></td><td>measure</td><td>0</td><td>count</td></tr>
+        <tr><td>25</td><td>Y</td><td><code>Available Time</code></td><td>measure</td><td>0:08:21</td><td>HH:MM:SS</td></tr>
+        <tr><td>26</td><td>Z</td><td><code>Not Ready Time</code></td><td>measure</td><td>0:01:45</td><td>HH:MM:SS</td></tr>
+        <tr><td>27</td><td>AA</td><td><code>RONA</code></td><td>measure</td><td>0</td><td>redirect on no answer count</td></tr>
+        <tr><td>28</td><td>AB</td><td><code>Abandoned Hold Calls</code></td><td>measure</td><td>0</td><td>count</td></tr>
+        <tr><td>29</td><td>AC</td><td><code>Total Logged In Time</code></td><td>measure</td><td>0:07:17</td><td>HH:MM:SS</td></tr>
+        <tr><td>30</td><td>AD</td><td><code>Total Work Time</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
+        <tr><td>31</td><td>AE</td><td><code>CallsHandled</code></td><td>measure</td><td>1</td><td>count</td></tr>
+        <tr><td>32</td><td>AF</td><td><code>Total Talk Time</code></td><td>measure</td><td>0:02:22</td><td>HH:MM:SS</td></tr>
+        <tr><td>33</td><td>AG</td><td><code>Total Hold Time</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><p>Grain of this report = <strong>agent &times; 15-minute interval &times; precision queue</strong>,
+    aggregated to Daily. The CCAI/UJET BigQuery data is <strong>per call</strong>, so mapping requires a
+    <code>GROUP BY</code> to this grain.</p></div>
+
+    <!-- ================================================================ -->
+    <h2 id="metadata-current">5b. Actual BigQuery table &mdash; <code>ccaas_raw_lab.metadata_current</code></h2>
+    <p>The live per-call table in <code>p-640-lab-itmsc.ccaas_raw_lab</code>. Confirmed from
+    <code>SELECT * FROM metadata_current WHERE session_key = 'call-12175'</code>. Same columns as the flat
+    <code>metadata</code> table plus five view-added columns (<code>channel</code>, <code>provider_channel_id</code>,
+    <code>session_key</code>, <code>provider_conversation_id</code>, <code>row_hash</code>).</p>
+    <table>
+      <thead><tr><th>#</th><th>Column</th><th>Type</th><th>Sample (call-12175)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>id</code></td><td>INT64</td><td>12175</td></tr>
+        <tr><td>2</td><td><code>call_uuid</code></td><td>STRING</td><td>57272f16-15c2-4cac-b4b4-ca26&hellip;</td></tr>
+        <tr><td>3</td><td><code>lang</code></td><td>STRING</td><td>en</td></tr>
+        <tr><td>4</td><td><code>call_type</code></td><td>STRING</td><td>Voice Inbound (IVR)</td></tr>
+        <tr><td>5</td><td><code>session_type</code></td><td>STRING</td><td>Voice Inbound (IVR)</td></tr>
+        <tr><td>6</td><td><code>session_type_v2</code></td><td>STRING</td><td>Voice Inbound (IVR)</td></tr>
+        <tr><td>7</td><td><code>status</code></td><td>STRING</td><td>finished</td></tr>
+        <tr><td>8</td><td><code>created_at</code></td><td>TIMESTAMP</td><td>2026-09-04 16:05:28 UTC</td></tr>
+        <tr><td>9</td><td><code>queued_at</code></td><td>TIMESTAMP</td><td>2026-09-04 16:08:14 UTC</td></tr>
+        <tr><td>10</td><td><code>assigned_at</code></td><td>TIMESTAMP</td><td>2026-09-04 16:08:30 UTC</td></tr>
+        <tr><td>11</td><td><code>connected_at</code></td><td>TIMESTAMP</td><td>2026-09-04 16:05:53 UTC</td></tr>
+        <tr><td>12</td><td><code>ends_at</code></td><td>TIMESTAMP</td><td>2026-09-04 16:09:04 UTC</td></tr>
+        <tr><td>13</td><td><code>updated_at</code></td><td>TIMESTAMP</td><td>2026-09-04 16:10:37 UTC</td></tr>
+        <tr><td>14</td><td><code>wait_duration</code></td><td>INT64</td><td>0</td></tr>
+        <tr><td>15</td><td><code>call_duration</code></td><td>INT64</td><td>251 (seconds)</td></tr>
+        <tr><td>16</td><td><code>hold_duration</code></td><td>INT64</td><td>0</td></tr>
+        <tr><td>17</td><td><code>has_feedback</code></td><td>BOOL</td><td>false</td></tr>
+        <tr><td>18</td><td><code>out_ticket_id</code></td><td>STRING</td><td>003D700001H5yyMIAR</td></tr>
+        <tr><td>19</td><td><code>out_ticket_url</code></td><td>STRING</td><td>https://costcowholesalecorporation2--itmscqa.sandbox.my.salesforce.com/&hellip;/Contact/003D700001H5yyMIAR/view</td></tr>
+        <tr><td>20</td><td><code>is_out_ticket_account</code></td><td>BOOL</td><td>true</td></tr>
+        <tr><td>21</td><td><code>verified</code></td><td>BOOL</td><td>false</td></tr>
+        <tr><td>22</td><td><code>recording_url</code></td><td>STRING</td><td>null</td></tr>
+        <tr><td>23</td><td><code>recording_permission</code></td><td>STRING</td><td>not_asked</td></tr>
+        <tr><td>24</td><td><code>voicemail_reason</code></td><td>STRING</td><td>not_voicemail</td></tr>
+        <tr><td>25</td><td><code>deflection</code></td><td>STRING</td><td>no_deflection</td></tr>
+        <tr><td>26</td><td><code>disconnected_by</code></td><td>STRING</td><td>disconnected_by_end_user</td></tr>
+        <tr><td>27</td><td><code>fail_reason</code></td><td>STRING</td><td>nothing</td></tr>
+        <tr><td>28</td><td><code>support_number</code></td><td>STRING</td><td>+18153935508</td></tr>
+        <tr><td>29</td><td><code>selected_menu_id</code></td><td>INT64</td><td>8</td></tr>
+        <tr><td>30</td><td><code>selected_menu_name</code></td><td>STRING</td><td>US_ECOMM_General_CB</td></tr>
+        <tr><td>31</td><td><code>selected_menu_type</code></td><td>STRING</td><td>ivr_menu</td></tr>
+        <tr><td>32</td><td><code>menu_path_items_count</code></td><td>INT64</td><td>3</td></tr>
+        <tr><td>33</td><td><code>menu_path_name</code></td><td>STRING</td><td>Routing Queues/ECOMM General&hellip;</td></tr>
+        <tr><td>34</td><td><code>menu_path_materialized_path</code></td><td>STRING</td><td>2/6/8</td></tr>
+        <tr><td>35</td><td><code>queue_priority_level</code></td><td>INT64</td><td>0</td></tr>
+        <tr><td>36</td><td><code>agent_info_id</code></td><td>INT64</td><td>31</td></tr>
+        <tr><td>37</td><td><code>agent_info_name</code></td><td>STRING</td><td>Chandrika Veerkar</td></tr>
+        <tr><td>38</td><td><code>end_user_id</code></td><td>INT64</td><td>3014</td></tr>
+        <tr><td>39</td><td><code>end_user_out_contact_id</code></td><td>STRING</td><td>003D700001H5yyMIAR</td></tr>
+        <tr><td>40</td><td><code>offer_type</code></td><td>STRING</td><td>cascade</td></tr>
+        <tr><td>41</td><td><code>answer_type</code></td><td>STRING</td><td>manual</td></tr>
+        <tr><td>42</td><td><code>participants_count</code></td><td>INT64</td><td>3</td></tr>
+        <tr><td>43</td><td><code>transfers_count</code></td><td>INT64</td><td>0</td></tr>
+        <tr><td>44</td><td><code>escalations_count</code></td><td>INT64</td><td>1</td></tr>
+        <tr><td>45</td><td><code>recordings_count</code></td><td>INT64</td><td>1</td></tr>
+        <tr><td>46</td><td><code>participants_json</code></td><td>STRING (JSON)</td><td>[{adapter_fail_code, agent_assist, call_duration:216, call_id:12175, connected_at&hellip;}]</td></tr>
+        <tr><td>47</td><td><code>recordings_json</code></td><td>STRING (JSON)</td><td>[{call_id:12175, conference_sid, duration:137, id:8949, recording_type:"virtual_agent", redaction_times:[], started_at&hellip;}]</td></tr>
+        <tr><td>48</td><td><code>va_handle_durations_json</code></td><td>STRING (JSON)</td><td>[{call_duration:137, ended_at, escalation_reason:"by_virtual_agent", fallback_response_count:0, finish_reason:"esca&hellip;"}]</td></tr>
+        <tr><td>49</td><td><code>consumer_handle_durations_json</code></td><td>STRING (JSON)</td><td>[{call_duration:216, ended_at, hold_duration:0, id:7489, started_at&hellip;}]</td></tr>
+        <tr><td>50</td><td><code>raw_json</code></td><td>JSON</td><td>{adapter_fail_code:null, agent_info:{agent_number:null, avatar_url:"https://qat-640-aqd2ubm.uw1.ccaiplatform.com/as&hellip;"}}</td></tr>
+        <tr><td>51</td><td><code>channel</code></td><td>STRING</td><td>call</td></tr>
+        <tr><td>52</td><td><code>provider_channel_id</code></td><td>STRING</td><td>null</td></tr>
+        <tr><td>53</td><td><code>session_key</code></td><td>STRING</td><td>call-12175</td></tr>
+        <tr><td>54</td><td><code>provider_conversation_id</code></td><td>STRING</td><td>57272f16-15c2-4cac-b4b4-ca26&hellip;</td></tr>
+        <tr><td>55</td><td><code>row_hash</code></td><td>STRING</td><td>1039963cedffa245d467e4c77a&hellip;</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><p><strong>Observed value samples</strong> &mdash;
+    <code>call_type</code>/<code>session_type</code>: <code>Voice Inbound (IVR)</code>;
+    <code>status</code>: <code>finished</code>;
+    <code>disconnected_by</code>: <code>disconnected_by_end_user</code>;
+    <code>fail_reason</code>: <code>nothing</code>;
+    <code>offer_type</code>: <code>cascade</code>; <code>answer_type</code>: <code>manual</code>;
+    <code>deflection</code>: <code>no_deflection</code>; <code>recording_permission</code>: <code>not_asked</code>;
+    <code>voicemail_reason</code>: <code>not_voicemail</code>; <code>channel</code>: <code>call</code>.</p></div>
+
+    <!-- ================================================================ -->
+    <h2 id="map-query-to-cisco">6. <code>metadata_current</code> &rarr; Cisco report field</h2>
+    <p>Left column = real column in <code>ccaas_raw_lab.metadata_current</code>. The report grain is
+    <strong>agent &times; 15-min interval &times; precision queue</strong>, so most rows below need a
+    <code>GROUP BY</code> rollup off the per-call table.</p>
+    <table>
+      <thead><tr><th>Cisco report field</th><th>Query table source</th><th>Transform</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>LOB</code></td><td class="todo">none</td><td>const / derive</td><td>no CCAI column. Constant (<code>BDUS</code>) or derive from <code>menu_path_name</code> / <code>selected_menu_name</code> prefix (e.g. <code>US_ECOMM_*</code>)</td></tr>
+        <tr><td><code>Week</code></td><td><code>created_at</code></td><td>derive: <code>EXTRACT(ISOWEEK FROM created_at)</code></td><td>confirm week-start convention vs Cisco</td></tr>
+        <tr><td><code>Date</code></td><td><code>created_at</code></td><td>cast: <code>FORMAT_DATE('%m/%d/%Y', DATE(created_at, tz))</code></td><td>source is UTC; Cisco report likely local tz</td></tr>
+        <tr><td><code>PQ ID</code></td><td><code>selected_menu_id</code></td><td>lookup</td><td>sample <code>8</code>. Needs menu-id &rarr; Cisco precision-queue-id cross-walk</td></tr>
+        <tr><td><code>PQ Name</code></td><td><code>selected_menu_name</code> / <code>menu_path_name</code></td><td>lookup</td><td>sample <code>US_ECOMM_General_CB</code> / <code>Routing Queues/ECOMM General&hellip;</code></td></tr>
+        <tr><td><code>Team Name</code></td><td class="todo">none</td><td>lookup</td><td>no CCAI column &mdash; needs agent &rarr; team roster</td></tr>
+        <tr><td><code>Agent</code></td><td><code>agent_info_name</code></td><td>direct + reformat</td><td>sample <code>Chandrika Veerkar</code>; Cisco uses <code>First_Last</code> &rarr; replace space with <code>_</code></td></tr>
+        <tr><td><code>Hour</code></td><td><code>created_at</code></td><td>derive: <code>EXTRACT(HOUR FROM created_at, tz)</code></td><td>pick which timestamp defines the interval (created / connected / assigned)</td></tr>
+        <tr><td><code>Time Interval</code></td><td><code>created_at</code></td><td>derive: floor to 15 min &rarr; <code>H:MM:SS</code></td><td>same timestamp choice as Hour</td></tr>
+        <tr><td><code>Unique ID</code></td><td>&mdash; (composite)</td><td>concat</td><td><code>Period_Source_Week_YYYYMMDD-HHMM_LOB_PQID_AgentID</code></td></tr>
+        <tr><td><code>Period</code></td><td>&mdash;</td><td>const: <code>Daily</code></td><td>report is a daily rollup</td></tr>
+        <tr><td><code>Source</code></td><td>&mdash;</td><td>const: <code>Agent</code></td><td>agent-detail report</td></tr>
+        <tr><td><code>AgentID</code></td><td><code>agent_info_id</code></td><td>lookup</td><td>sample <code>31</code>. Cisco <code>AgentID</code> sample <code>8748</code> &mdash; different ID space, cross-walk needed</td></tr>
+        <tr><td><code>PeripheralNumber</code></td><td class="todo">none</td><td>lookup</td><td>no CCAI column &mdash; from Cisco agent record</td></tr>
+        <tr><td><code>AgentOut Calls</code></td><td><code>call_type</code></td><td>derive: <code>COUNTIF(call_type</code> is an outbound type<code>)</code></td><td>only inbound value seen so far (<code>Voice Inbound (IVR)</code>); confirm outbound label</td></tr>
+        <tr><td><code>AgentOut Calls TalkTime</code></td><td><code>call_duration</code> + <code>call_type</code></td><td>derive: <code>SUM(call_duration)</code> where outbound &rarr; HH:MM:SS</td><td class="todo">TBD outbound label</td></tr>
+        <tr><td><code>Calls Answered</code></td><td><code>status</code> / <code>connected_at</code> / <code>answer_type</code></td><td>derive: <code>COUNTIF(connected_at IS NOT NULL)</code> or <code>status='finished'</code></td><td>only <code>finished</code> status seen; enumerate the rest</td></tr>
+        <tr><td><code>CallsAbandoned</code></td><td><code>status</code> / <code>fail_reason</code> / <code>connected_at</code></td><td>derive: <code>COUNTIF(queued_at IS NOT NULL AND connected_at IS NULL)</code></td><td><code>fail_reason='nothing'</code> = no failure; confirm abandoned encoding</td></tr>
+        <tr><td><code>Avg Talktime</code></td><td><code>call_duration</code></td><td>derive: <code>AVG(call_duration)</code> &rarr; HH:MM:SS</td><td>seconds. Sample 251; consumer_handle_durations shows 216 &mdash; confirm which is "talk"</td></tr>
+        <tr><td><code>Avg WorkTime</code></td><td class="todo">none</td><td>derive</td><td>after-call work not in table; possibly <code>assigned_at</code>&rarr;<code>ends_at</code> gap, or from a JSON field</td></tr>
+        <tr><td><code>Avg HoldTime</code></td><td><code>hold_duration</code></td><td>derive: <code>AVG(hold_duration)</code> &rarr; HH:MM:SS</td><td>seconds. Sample 0</td></tr>
+        <tr><td><code>AHT</code></td><td><code>call_duration</code> + <code>hold_duration</code> (+ work)</td><td>derive: <code>AVG(handle)</code> &rarr; HH:MM:SS</td><td>fix the handle-time formula once WorkTime source is known</td></tr>
+        <tr><td><code>TransferIn</code></td><td><code>transfers_count</code> / <code>participants_json</code></td><td>derive</td><td>count=0 here; direction only in <code>participants_json</code> / <code>raw_json</code></td></tr>
+        <tr><td><code>TransferOut</code></td><td><code>transfers_count</code> / <code>participants_json</code></td><td>derive</td><td>parse JSON for direction; <code>escalations_count</code> (=1) may be relevant</td></tr>
+        <tr><td><code>Available Time</code></td><td class="todo">none</td><td>derive</td><td>agent state time &mdash; not in CCAI call export</td></tr>
+        <tr><td><code>Not Ready Time</code></td><td class="todo">none</td><td>derive</td><td>agent state time &mdash; not in CCAI call export</td></tr>
+        <tr><td><code>RONA</code></td><td class="todo">none</td><td>derive</td><td>redirect-on-no-answer &mdash; maybe from <code>session_data_feeds</code> events; not in metadata</td></tr>
+        <tr><td><code>Abandoned Hold Calls</code></td><td class="todo">none</td><td>derive</td><td>no direct column; <code>hold_duration</code>&gt;0 AND abandoned?</td></tr>
+        <tr><td><code>Total Logged In Time</code></td><td class="todo">none</td><td>derive</td><td>agent session time &mdash; not in CCAI call export</td></tr>
+        <tr><td><code>Total Work Time</code></td><td class="todo">none</td><td>derive</td><td>same as Avg WorkTime &mdash; source unknown</td></tr>
+        <tr><td><code>CallsHandled</code></td><td><code>id</code> / <code>connected_at</code></td><td>derive: <code>COUNT(*)</code> where agent connected, in grain</td><td>define "handled" (connected to a human agent)</td></tr>
+        <tr><td><code>Total Talk Time</code></td><td><code>call_duration</code></td><td>derive: <code>SUM(call_duration)</code> &rarr; HH:MM:SS</td><td>seconds</td></tr>
+        <tr><td><code>Total Hold Time</code></td><td><code>hold_duration</code></td><td>derive: <code>SUM(hold_duration)</code> &rarr; HH:MM:SS</td><td>seconds</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><p><strong>Coverage gap:</strong> many Cisco fields (<code>PeripheralNumber</code>,
+    <code>Team Name</code>, <code>Available Time</code>, <code>Not Ready Time</code>, <code>Total Logged In Time</code>,
+    <code>RONA</code>) describe <em>agent state / roster</em>, which the CCAI/UJET call export does not contain.
+    Those need a separate source (Cisco Finesse / agent roster / real-time state feed).</p></div>
+
+    <!-- ================================================================ -->
+    <h2 id="requirements">6c. Kevin's requirements &mdash; working session (Sep 10, 2026)</h2>
+    <p><em>Source: "Schedule CCaaS Exports to CC Archive" working session, Kevin McCoy (reporting owner) &amp; Rohit Godugu.
+    Notes below are a summary; verify against the recording before building.</em></p>
+
+    <h3>What Kevin wants &mdash; two report shapes</h3>
+    <ol>
+      <li><strong>Queue report</strong> &mdash; nothing to do with individual agents.
+        <ul>
+          <li>Dimensions: <strong>Queue</strong> and <strong>time interval</strong> (date is split out but is the same axis).</li>
+          <li>The "big five" measures: <strong>Offered</strong>, <strong>Answered</strong>, <strong>Abandoned</strong>
+          (roughly offered &minus; answered), <strong>Service Level</strong> (% of answered calls answered within a
+          configured threshold), <strong>ASA</strong> (average speed of answer &mdash; how long answered calls waited).</li>
+          <li>6th: <strong>Longest wait time</strong> in the interval (for answered calls).</li>
+          <li>Nice-to-have: <strong>max calls in queue</strong> at each interval.</li>
+          <li>Collected but not critical: abandon-within-30s buckets, abandoned-by-agent vs abandoned-by-member.</li>
+        </ul>
+      </li>
+      <li><strong>Agent report</strong>.
+        <ul>
+          <li>Dimensions: <strong>time interval</strong>, <strong>queue</strong>, <strong>agent</strong>.</li>
+          <li>Core measures (the ones they actually need): <strong>Calls Answered</strong>, <strong>Talk Time</strong>,
+          <strong>Work Time</strong> (after-call wrap-up), <strong>Hold Time</strong>.
+          Talk + Work + Hold = <strong>Handle Time (AHT)</strong>.</li>
+          <li>"Take it if we have it": Agent-Out calls, Transfer In / Transfer Out (historically unreliable).</li>
+          <li>Low value: Logged-In / Available / Not-Ready time &mdash; double-counts when an agent is logged into
+          multiple queues (every logged-in second counts on every queue).</li>
+        </ul>
+      </li>
+    </ol>
+
+    <!-- ---------------------------------------------------------------- -->
+    <h3 id="kevin-wants">What Kevin actually wants &mdash; CCAI side vs Cisco side</h3>
+    <p>One row per attribute/measure Kevin asked for. <strong>CCAI (BigQuery)</strong> = column in
+    <code>ccaas_raw_lab.metadata_current</code> (or a derivation from it). <strong>Cisco</strong> = column in the
+    <code>SummaryDaily Reports</code> export. <span class="todo">italic grey</span> = not available on that side.</p>
+
+    <h4>A. Queue report &mdash; dimensions</h4>
+    <table>
+      <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
+      <tbody>
+        <tr><td>Queue</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td>Time interval</td><td><code>queued_at</code> (floor to 15 min) &mdash; also <code>assigned_at</code> / <code>created_at</code></td><td><code>Time Interval</code>, <code>Hour</code></td></tr>
+        <tr><td>Date</td><td><code>DATE(queued_at)</code></td><td><code>Date</code>, <code>Week</code></td></tr>
+      </tbody>
+    </table>
+
+    <h4>B. Queue report &mdash; measures ("the big five" + 2)</h4>
+    <table>
+      <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
+      <tbody>
+        <tr><td>Offered (calls coming in)</td><td>derive: <code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td>Answered (to an agent)</td><td>derive: <code>COUNTIF(assigned_at IS NOT NULL)</code> / <code>agent_info_id</code> set</td><td><code>Calls Answered</code></td></tr>
+        <tr><td>Abandoned (offered &minus; answered)</td><td>derive: <code>queued_at IS NOT NULL AND assigned_at IS NULL</code></td><td><code>CallsAbandoned</code></td></tr>
+        <tr><td>Service Level (% answered within threshold)</td><td>derive: <code>COUNTIF((assigned_at - queued_at) &lt;= threshold) / COUNTIF(answered)</code> &mdash; threshold TBD</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td>ASA (avg speed of answer)</td><td>derive: <code>AVG(assigned_at - queued_at)</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td>Longest wait time (interval)</td><td>derive: <code>MAX(assigned_at - queued_at)</code> over answered</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td>Max calls in queue / interval (nice-to-have)</td><td class="todo">concurrency calc over <code>queued_at</code>&hellip;<code>assigned_at</code> &mdash; hard from per-call rows</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td>Abandon &lt;30s buckets / abandoned-by (collected, not critical)</td><td><code>disconnected_by</code> + wait math</td><td>partial: <code>Abandoned Hold Calls</code></td></tr>
+      </tbody>
+    </table>
+
+    <h4>C. Agent report &mdash; dimensions</h4>
+    <table>
+      <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
+      <tbody>
+        <tr><td>Time interval</td><td><code>assigned_at</code> / <code>connected_at</code> (floor to 15 min)</td><td><code>Time Interval</code>, <code>Hour</code>, <code>Date</code></td></tr>
+        <tr><td>Queue</td><td><code>selected_menu_name</code> / <code>menu_path_name</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td>Agent (the person)</td><td><code>agent_info_id</code> (31), <code>agent_info_name</code> ("Chandrika Veerkar")</td><td><code>Agent</code>, <code>AgentID</code>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
+      </tbody>
+    </table>
+
+    <h4>D. Agent report &mdash; measures</h4>
+    <table>
+      <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
+      <tbody>
+        <tr><td>Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td><code>Calls Answered</code>, <code>CallsHandled</code></td></tr>
+        <tr><td>Talk Time (on phone with member)</td><td><code>call_duration</code> (251s) &mdash; or <code>consumer_handle_durations_json.call_duration</code> (216s), confirm which</td><td><code>Avg Talktime</code>, <code>Total Talk Time</code></td></tr>
+        <tr><td>Work Time (after-call wrap-up)</td><td class="todo">no dedicated column &mdash; candidate: <code>updated_at</code> &minus; <code>ends_at</code> (93s in sample)</td><td><code>Avg WorkTime</code>, <code>Total Work Time</code></td></tr>
+        <tr><td>Hold Time (member on hold)</td><td><code>hold_duration</code> (0s)</td><td><code>Avg HoldTime</code>, <code>Total Hold Time</code></td></tr>
+        <tr><td>Handle Time = Talk + Work + Hold</td><td>derive (blocked on Work Time)</td><td><code>AHT</code></td></tr>
+        <tr><td>Agent-Out calls (if available)</td><td><code>call_type</code> (only "Voice Inbound (IVR)" seen &mdash; confirm outbound value)</td><td><code>AgentOut Calls</code>, <code>AgentOut Calls TalkTime</code></td></tr>
+        <tr><td>Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td><code>TransferIn</code>, <code>TransferOut</code></td></tr>
+        <tr><td>Logged-In / Available / Not-Ready (low value)</td><td class="todo">not in table &mdash; agent-state feed only</td><td><code>Total Logged In Time</code>, <code>Available Time</code>, <code>Not Ready Time</code></td></tr>
+        <tr><td>RONA / redirect-on-no-answer (misc)</td><td class="todo">not in metadata &mdash; maybe <code>session_data_feeds</code> events</td><td><code>RONA</code></td></tr>
+      </tbody>
+    </table>
+
+    <h4>E. Virtual-agent performance (Kevin wants this included, voice + chat)</h4>
+    <table>
+      <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
+      <tbody>
+        <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td class="todo">not represented</td></tr>
+        <tr><td>VA answered / handled</td><td><code>va_handle_durations_json</code> (<code>call_duration</code> 137s, <code>finish_reason</code>)</td><td class="todo">not represented</td></tr>
+        <tr><td>Resolved / contained vs escalated</td><td><code>escalations_count</code> (1), <code>deflection</code> (no_deflection), <code>va_handle_durations_json.finish_reason</code> ("esca&hellip;"), <code>recordings_json.recording_type</code> ("virtual_agent")</td><td class="todo">not represented</td></tr>
+        <tr><td>Self-service MSA vs FAQ-bot split</td><td class="todo"><code>menu_path</code> / sub-agent name / <code>raw_json</code> &mdash; field TBD</td><td class="todo">not represented</td></tr>
+      </tbody>
+    </table>
+
+    <h4>F. Grain, keys &amp; PII</h4>
+    <table>
+      <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
+      <tbody>
+        <tr><td>Stable interaction ID (distinct-call count)</td><td><code>id</code> (12175), <code>session_key</code> ("call-12175"), <code>call_uuid</code>, <code>provider_conversation_id</code></td><td><code>Unique ID</code></td></tr>
+        <tr><td>Chat ID</td><td><code>session_key</code> "chat-*" (chats live in <code>session_data_feeds</code>)</td><td class="todo">n/a in this report</td></tr>
+        <tr><td>One row per agent per interaction (transfer credit)</td><td class="todo">table is 1 row/call, single <code>agent_info_id</code> &mdash; must explode <code>participants_json</code> (<code>participants_count</code> = 3)</td><td>row-per-agent + <code>Unique ID</code> already assumed</td></tr>
+        <tr><td>Participants per interaction</td><td><code>participants_count</code> (3), <code>participants_json</code></td><td class="todo">not represented</td></tr>
+        <tr><td>Redact member phone number</td><td><code>session_data_feeds.consumer_number</code>, free-text <code>body</code> &mdash; mask before export</td><td class="todo">n/a (no transcript in report)</td></tr>
+        <tr><td>Redact member name</td><td><code>session_data_feeds.body</code> / transcript text &mdash; mask before export</td><td class="todo">n/a</td></tr>
+        <tr><td>Keep support-line number</td><td><code>support_number</code> (+18153935508)</td><td class="todo">n/a</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Cross-cutting requirements</h3>
+    <ul>
+      <li><strong>Virtual agents included</strong> (voice <em>and</em> chat) &mdash; both the self-service "member
+      service agent" (does real work via GMP: reward status, membership upgrade) and the FAQ / knowledge bot that
+      escalates. Want: how many interactions enter, how many answered, how many <strong>resolved / contained</strong>.
+      Kevin will separate VA stats in his own reports but wants them in the export.</li>
+      <li><strong>Grain = one row per interaction</strong>, keyed by <code>call_id</code> (calls) / <code>chat_id</code>
+      (chats). On a <strong>transfer</strong>, one row is not enough &mdash; each agent who handled the call must get a
+      row so both get credit. So: a stable interaction ID for distinct counting, plus per-agent rows for agent credit.
+      Queue "answered" counts distinct IDs; agent "answered" counts rows.</li>
+      <li><strong>PII: redact member name and member phone number</strong> from transcripts. Kevin does not want to
+      collect member PII (compliance burden). The support-line number is fine.</li>
+      <li><strong>Where wait time occurs in CCAI</strong>: member &rarr; steering/root agent (= IVR) &rarr; sub-agent
+      (order mgmt, membership, &hellip;; these sub-agents <em>are</em> deployed to queues / PQs) &rarr; escalation
+      agent &rarr; human agent. <strong>No wait time until escalation to a human agent</strong> &mdash; ASA / wait
+      time only accrues at that last step.</li>
+    </ul>
+
+    <h3>Coverage vs our columns</h3>
+    <h4>Queue report</h4>
+    <table>
+      <thead><tr><th>Kevin needs</th><th>Cisco Agent-Detail col</th><th>CCAI <code>metadata_current</code></th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Queue dimension</td><td><code>PQ ID</code> / <code>PQ Name</code></td><td><code>selected_menu_id</code> / <code>selected_menu_name</code> / <code>menu_path_name</code></td><td>Derivable &mdash; needs menu &rarr; human-PQ cross-walk</td></tr>
+        <tr><td>Time interval / date</td><td><code>Date</code> / <code>Hour</code> / <code>Time Interval</code></td><td><code>queued_at</code> / <code>assigned_at</code> / <code>created_at</code></td><td>Derivable (choose interval timestamp; tz)</td></tr>
+        <tr><td>Offered</td><td>&mdash; (not in agent report)</td><td><code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td>Derivable</td></tr>
+        <tr><td>Answered</td><td><code>Calls Answered</code></td><td><code>COUNTIF(assigned_at IS NOT NULL)</code> / <code>agent_info_id</code> set</td><td>Derivable</td></tr>
+        <tr><td>Abandoned</td><td><code>CallsAbandoned</code></td><td><code>queued_at IS NOT NULL AND assigned_at IS NULL</code></td><td>Derivable &mdash; confirm encoding</td></tr>
+        <tr><td>Service Level</td><td>&mdash;</td><td><code>COUNTIF(assigned_at - queued_at &lt;= threshold)</code></td><td>Derivable <em>if</em> threshold supplied</td></tr>
+        <tr><td>ASA</td><td>&mdash;</td><td><code>AVG(assigned_at - queued_at)</code></td><td>Derivable &mdash; see timestamp note below</td></tr>
+        <tr><td>Longest wait time</td><td>&mdash;</td><td><code>MAX(assigned_at - queued_at)</code></td><td>Derivable</td></tr>
+        <tr><td>Max calls in queue / interval</td><td>&mdash;</td><td>concurrency calc over <code>queued_at</code>&hellip;<code>assigned_at</code></td><td>Hard from per-call rows &mdash; Kevin: "not so important"</td></tr>
+        <tr><td>Abandon &lt;30s buckets, abandoned-by</td><td>partial (<code>Abandoned Hold Calls</code>)</td><td><code>disconnected_by</code> + wait math</td><td>Partially derivable</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><p><strong>Gap:</strong> the sample export we have is the <em>Agent-Detail</em> report only.
+    Kevin needs a separate <strong>Queue-interval</strong> report (Offered / SL / ASA / Longest Wait / Max-in-Q) &mdash;
+    get that report's column layout too.</p>
+    <p><strong>Timestamp caution:</strong> for call-12175, <code>connected_at</code> (16:05:53) is <em>before</em>
+    <code>queued_at</code> (16:08:14) &mdash; <code>connected_at</code> looks like the virtual-agent connect, while the
+    human-queue wait is <code>queued_at</code> &rarr; <code>assigned_at</code> (16:08:30). Confirm which pair defines ASA.
+    <code>wait_duration</code> = 0 in the sample &mdash; confirm what it measures.</p></div>
+
+    <h4>Agent report</h4>
+    <table>
+      <thead><tr><th>Kevin needs</th><th>Cisco Agent-Detail col</th><th>CCAI <code>metadata_current</code></th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Interval / queue / agent dims</td><td><code>Time Interval</code> / <code>PQ *</code> / <code>Agent</code> + <code>AgentID</code></td><td>timestamps / <code>selected_menu_*</code> / <code>agent_info_id</code> + <code>agent_info_name</code></td><td>Covered (agent-ID cross-walk needed)</td></tr>
+        <tr><td>Calls Answered</td><td><code>Calls Answered</code> / <code>CallsHandled</code></td><td><code>COUNT</code> rows per agent (connected)</td><td>Covered</td></tr>
+        <tr><td>Talk Time</td><td><code>Avg Talktime</code> / <code>Total Talk Time</code></td><td><code>call_duration</code> (251s) &mdash; vs <code>consumer_handle_durations_json.call_duration</code> (216s)</td><td>Derivable &mdash; confirm which is "talk"</td></tr>
+        <tr><td>Work Time (ACW)</td><td><code>Avg WorkTime</code> / <code>Total Work Time</code></td><td class="todo">no dedicated column &mdash; maybe <code>ends_at</code>&rarr;<code>updated_at</code> gap (93s in sample)</td><td>Gap &mdash; confirm ACW source</td></tr>
+        <tr><td>Hold Time</td><td><code>Avg HoldTime</code> / <code>Total Hold Time</code></td><td><code>hold_duration</code> (0s)</td><td>Covered</td></tr>
+        <tr><td>Handle Time = Talk+Work+Hold</td><td><code>AHT</code></td><td>derive once Work Time is defined</td><td>Blocked on Work Time</td></tr>
+        <tr><td>Agent-Out calls</td><td><code>AgentOut Calls</code> / <code>&hellip; TalkTime</code></td><td><code>call_type</code> (only "Voice Inbound (IVR)" seen)</td><td>Derivable &mdash; confirm outbound label</td></tr>
+        <tr><td>Transfer In / Out</td><td><code>TransferIn</code> / <code>TransferOut</code></td><td><code>transfers_count</code> (0) + direction in <code>participants_json</code></td><td>Derivable via JSON explode</td></tr>
+        <tr><td>Per-agent credit on transfers</td><td>row per agent + <code>Unique ID</code></td><td class="todo"><code>metadata_current</code> = 1 row/call, single <code>agent_info_id</code></td><td><strong>Gap</strong> &mdash; need a participant-level table (explode <code>participants_json</code>, <code>participants_count</code>=3)</td></tr>
+        <tr><td>Logged-In / Available / Not-Ready</td><td><code>Total Logged In Time</code> / <code>Available Time</code> / <code>Not Ready Time</code></td><td class="todo">not present</td><td>Gap &mdash; agent-state feed; Kevin rates these low-value anyway</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Virtual agent / containment</h4>
+    <table>
+      <thead><tr><th>Kevin needs</th><th>CCAI source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td>Derivable</td></tr>
+        <tr><td>VA answered / handled</td><td><code>va_handle_durations_json</code> (<code>call_duration</code>, <code>finish_reason</code>)</td><td>Derivable</td></tr>
+        <tr><td>Resolved / contained vs escalated</td><td><code>escalations_count</code> (1), <code>deflection</code> (<code>no_deflection</code>), <code>va_handle_durations_json.finish_reason</code> ("esca&hellip;"), <code>offer_type</code> (<code>cascade</code>)</td><td>Derivable</td></tr>
+        <tr><td>Self-service MSA vs FAQ bot split</td><td class="todo"><code>menu_path</code> / sub-agent name / <code>raw_json</code></td><td>TBD &mdash; find the distinguishing field</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Grain &amp; keys</h4>
+    <table>
+      <thead><tr><th>Kevin needs</th><th>CCAI source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Stable interaction ID (calls)</td><td><code>id</code> / <code>session_key</code> (<code>call-12175</code>) / <code>call_uuid</code> / <code>provider_conversation_id</code></td><td>Covered</td></tr>
+        <tr><td>Chat ID</td><td><code>session_key</code> pattern (<code>chat-*</code> in <code>session_data_feeds</code>)</td><td>Covered (chats live in the other tables)</td></tr>
+        <tr><td>Participants per interaction</td><td><code>participants_count</code> (3) / <code>participants_json</code></td><td>Covered</td></tr>
+        <tr><td>One row per agent per interaction</td><td>explode <code>participants_json</code></td><td><strong>Gap</strong> &mdash; build the participant-grain table</td></tr>
+      </tbody>
+    </table>
+
+    <h4>PII</h4>
+    <table>
+      <thead><tr><th>Kevin needs</th><th>Where it appears</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>Redact member phone number</td><td><code>session_data_feeds.consumer_number</code>, free-text <code>body</code></td><td>Mask before export</td></tr>
+        <tr><td>Redact member name</td><td><code>session_data_feeds.body</code> / transcript text</td><td>Mask before export</td></tr>
+        <tr><td>Support-line number OK</td><td><code>metadata_current.support_number</code> (<code>+18153935508</code>)</td><td>Keep</td></tr>
+        <tr><td>Internal IDs OK</td><td><code>end_user_id</code> (3014), <code>end_user_out_contact_id</code> (SF contact)</td><td>Keep (review SF ID)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout"><p><strong>Bottom line:</strong> the CCAI per-call table covers most of Kevin's
+    <em>queue</em> measures (Offered / Answered / Abandoned / ASA / Longest Wait are all derivable from the
+    <code>queued_at</code>/<code>assigned_at</code> pair) and most <em>agent</em> core measures (Answered, Talk, Hold).
+    Four real gaps: (1) <strong>after-call Work Time</strong> has no clear column; (2) <strong>per-agent rows on
+    transfers</strong> need a participant-grain table; (3) <strong>agent-state times</strong> (Logged-In / Available /
+    Not-Ready) aren't in the export; (4) we're missing the <strong>Queue-interval report layout</strong> from Cisco.</p></div>
+
+    <!-- ================================================================ -->
+    <h2 id="map-metadata">7. <code>metadata</code> &rarr; Webex CC</h2>
+    <p>Source: <code>p-640-lab-itmsc.ccaas_raw_lab.metadata</code> (~7,278 rows, one per call).</p>
+    <table>
+      <thead><tr><th>Source column</th><th>Type</th><th>Target field</th><th>Transform</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>call_uuid</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>2,507 nulls in POC data</td></tr>
+        <tr><td><code>lang</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>call_type</code> / <code>session_type</code> / <code>session_type_v2</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>status</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">lookup</td><td>see <a href="#value-maps">value maps</a></td></tr>
+        <tr><td><code>created_at</code> / <code>queued_at</code> / <code>assigned_at</code> / <code>connected_at</code> / <code>ends_at</code> / <code>updated_at</code></td><td>TIMESTAMP</td><td class="todo">TBD</td><td class="todo">TBD</td><td>timezone / format TBD</td></tr>
+        <tr><td><code>wait_duration</code> / <code>call_duration</code> / <code>hold_duration</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td>seconds; confirm Webex unit (ms?)</td></tr>
+        <tr><td><code>has_feedback</code> / <code>verified</code> / <code>is_out_ticket_account</code></td><td>BOOL</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>out_ticket_id</code> / <code>out_ticket_url</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>recording_url</code> / <code>recording_permission</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>voicemail_reason</code> / <code>deflection</code> / <code>disconnected_by</code> / <code>fail_reason</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>support_number</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>selected_menu_id</code> / <code>selected_menu_name</code> / <code>selected_menu_type</code></td><td>INT64 / STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>menu_path_name</code> / <code>menu_path_materialized_path</code> / <code>menu_path_items_count</code></td><td>STRING / INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td>candidate for Webex queue</td></tr>
+        <tr><td><code>queue_priority_level</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>agent_info_id</code> / <code>agent_info_name</code></td><td>INT64 / STRING</td><td class="todo">TBD</td><td class="todo">lookup</td><td>needs agent ID cross-walk</td></tr>
+        <tr><td><code>end_user_id</code> / <code>end_user_out_contact_id</code></td><td>INT64 / STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>offer_type</code> / <code>answer_type</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>participants_count</code> / <code>transfers_count</code> / <code>escalations_count</code> / <code>recordings_count</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>participants_json</code> / <code>recordings_json</code> / <code>va_handle_durations_json</code> / <code>consumer_handle_durations_json</code></td><td>STRING (JSON)</td><td class="todo">TBD</td><td class="todo">explode</td><td>may map to per-leg Webex activity rows</td></tr>
+        <tr><td><code>raw_json</code></td><td>JSON</td><td>&mdash;</td><td>&mdash;</td><td>not mapped; retained for audit</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="map-session-feeds">8. <code>session_data_feeds</code> &rarr; Webex CC</h2>
+    <p>Source: <code>p-640-lab-itmsc.ccaas_raw_lab.session_data_feeds</code> (one row per event block).</p>
+    <table>
+      <thead><tr><th>Source column</th><th>Type</th><th>Target field</th><th>Transform</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>call_id</code> / <code>call_id_body</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>join key back to metadata</td></tr>
+        <tr><td><code>file_lang</code> / <code>language</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>event_type</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">lookup</td><td>17 known types &mdash; see <a href="#value-maps">value maps</a></td></tr>
+        <tr><td><code>event_time</code></td><td>TIMESTAMP</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>fail_reason</code> / <code>fail_details</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>menu</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>support_number</code> / <code>consumer_number</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>PII &mdash; masking rule TBD</td></tr>
+        <tr><td><code>disconnected_by</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>situation</code> / <code>action</code> / <code>resolution</code> / <code>agent</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>free text summary sections</td></tr>
+        <tr><td><code>crm_link</code> / <code>external_storage_link</code> / <code>gcs_url</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>sentiment_score</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td>scale / sign convention TBD</td></tr>
+        <tr><td><code>dp_queue_id</code> / <code>dp_order_number</code> / <code>dp_member_verified</code> / <code>dp_order_verified</code> / <code>dp_intent</code> / <code>dp_summary</code> / <code>dp_callid</code> / <code>dp_interaction_id</code> / <code>dp_channel</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>from <code>dataParameters</code></td></tr>
+        <tr><td><code>data_parameters_json</code></td><td>STRING (JSON)</td><td class="todo">TBD</td><td class="todo">TBD</td><td>overflow / audit</td></tr>
+        <tr><td><code>source_file</code> / <code>body</code></td><td>STRING</td><td>&mdash;</td><td>&mdash;</td><td>provenance; not mapped</td></tr>
+        <tr><td><code>raw_json</code></td><td>JSON</td><td>&mdash;</td><td>&mdash;</td><td>not mapped; retained for audit</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="map-ujet">9. <code>ujet_session_summaries</code> &rarr; Webex CC</h2>
+    <p>Source: <code>p-640-lab-itmsc.ccaas_raw_lab.ujet_session_summaries</code> (~30 rows in POC).</p>
+    <table>
+      <thead><tr><th>Source column</th><th>Type</th><th>Target field</th><th>Transform</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td>join key to metadata</td></tr>
+        <tr><td><code>type</code> / <code>menu_type</code> / <code>menu_path</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>ended_at</code> / <code>finished_at</code></td><td>TIMESTAMP</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>session_summary</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>free text</td></tr>
+        <tr><td><code>summary_situation</code> / <code>summary_action</code> / <code>summary_resolution</code> / <code>summary_agent</code></td><td>STRING</td><td class="todo">TBD</td><td class="todo">TBD</td><td>parsed summary sections</td></tr>
+        <tr><td><code>summary_sections_count</code></td><td>INT64</td><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td><code>session_summary_sections_json</code></td><td>STRING (JSON)</td><td class="todo">TBD</td><td class="todo">TBD</td><td>overflow / audit</td></tr>
+        <tr><td><code>raw_json</code></td><td>JSON</td><td>&mdash;</td><td>&mdash;</td><td>not mapped; retained for audit</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="value-maps">Reference: value / enum maps</h2>
+
+    <h3><code>metadata.status</code> &rarr; Webex CC</h3>
+    <table>
+      <thead><tr><th>BigQuery value</th><th>Webex CC value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="todo">TBD</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+      </tbody>
+    </table>
+
+    <h3><code>session_data_feeds.event_type</code> &rarr; Webex CC activity / event</h3>
+    <table>
+      <thead><tr><th>BigQuery event_type</th><th>Webex CC target</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Call started</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Call ended</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Call failed</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Chat started</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Chat ended</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Dispositions</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Segment sentiment score</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Session sentiment score</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Customer rating received</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Customer email collected</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Agent Assist auto-generated Summary</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Session summary uploaded</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>CCAI Insight call recording uploaded</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>CCAI Insight chat history uploaded</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Text attachment uploaded</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>Custom data from the customer has arrived</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+        <tr><td>SIP Data Received</td><td class="todo">TBD</td><td class="todo">TBD</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="transforms">Reference: transform rules</h2>
+    <table>
+      <thead><tr><th>Rule</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td><code>direct</code></td><td>Copy value unchanged.</td></tr>
+        <tr><td><code>cast</code></td><td>Change type only (e.g. TIMESTAMP &rarr; ISO-8601 string). <span class="todo">TBD target formats</span>.</td></tr>
+        <tr><td><code>lookup</code></td><td>Replace via a value map in <a href="#value-maps">value / enum maps</a>.</td></tr>
+        <tr><td><code>concat</code></td><td>Join multiple source columns. <span class="todo">TBD</span>.</td></tr>
+        <tr><td><code>derive</code></td><td>Computed (e.g. duration = <code>ends_at - connected_at</code>). <span class="todo">TBD</span>.</td></tr>
+        <tr><td><code>explode</code></td><td>Expand a JSON array into multiple Webex rows. <span class="todo">TBD grain</span>.</td></tr>
+        <tr><td>Timezone</td><td class="todo">TBD &mdash; BigQuery timestamps are UTC; confirm Webex expectation.</td></tr>
+        <tr><td>Duration unit</td><td class="todo">TBD &mdash; source is seconds; confirm Webex unit.</td></tr>
+        <tr><td>PII handling</td><td class="todo">TBD &mdash; phone numbers, emails, CRM links.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="open-questions">Open questions</h2>
+    <ol>
+      <li>Which Webex CC surface is the target &mdash; Provisioning API, a data import, or the Analyzer / Reporting model?</li>
+      <li>Is this a one-way load, or reconciliation between CCAI data and Webex CC records?</li>
+      <li>What is the join key between CCAI <code>call_uuid</code> / <code>id</code> and a Webex CC contact / session ID?</li>
+      <li>Target grain: one row per contact, per session, or per activity leg?</li>
+      <li>Agent ID cross-walk: how do UJET <code>agent_info_id</code> values map to Webex CC agent IDs?</li>
+      <li>Queue model: does <code>menu_path_*</code> map to a Webex CC queue, entry point, or something else?</li>
+      <li>Required vs optional Webex CC fields with no CCAI source &mdash; defaults?</li>
+      <li>Timestamp format, timezone, and duration units expected by the target.</li>
+    </ol>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" });
+
+  var COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  document.querySelectorAll(".code-block").forEach(function (block) {
+    var lang = block.dataset.lang;
+    if (lang) {
+      var tag = document.createElement("span");
+      tag.className = "lang";
+      tag.textContent = lang;
+      block.appendChild(tag);
+    }
+    var btn = document.createElement("button");
+    btn.className = "copy-btn";
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.innerHTML = COPY_ICON;
+    btn.addEventListener("click", function () {
+      var text = block.querySelector("code").innerText;
+      var done = function () {
+        btn.classList.add("copied");
+        btn.innerHTML = CHECK_ICON;
+        setTimeout(function () {
+          btn.classList.remove("copied");
+          btn.innerHTML = COPY_ICON;
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {
+          fallbackCopy(block); done();
+        });
+      } else {
+        fallbackCopy(block); done();
+      }
+    });
+    block.appendChild(btn);
+  });
+
+  function fallbackCopy(block) {
+    var r = document.createRange();
+    r.selectNode(block.querySelector("code"));
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+    try { document.execCommand("copy"); } catch (e) {}
+    sel.removeAllRanges();
+  }
+</script>
+</body>
+</html>
