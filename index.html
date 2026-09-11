@@ -61,8 +61,8 @@
       overflow:auto; background:#fff; }
     .diagram .mermaid svg { max-width:100%; height:auto; max-height:520px; }
     .diagram .mermaid { font-size:13px; }
-    table.kevin td:first-child { background:#dcfce7; color:#14532d; font-weight:600; }
     .kevin-said { background:#dcfce7; color:#14532d; padding:0 3px; border-radius:3px; }
+    td.kevin-said, h4.kevin-said { font-weight:600; padding:7px 11px; }
     @media (max-width:900px){ nav.toc{display:none;} main{padding:24px;} }
   </style>
 </head>
@@ -353,58 +353,58 @@ flowchart LR
     <code>SummaryDaily Reports</code> export. <span class="todo">italic grey</span> = not available on that side.</p>
 
     <h4>A. Queue report &mdash; dimensions</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
-        <tr><td>Queue</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
-        <tr><td>Time interval</td><td><code>queued_at</code> (floor to 15 min) &mdash; also <code>assigned_at</code> / <code>created_at</code></td><td><code>Time Interval</code>, <code>Hour</code></td></tr>
+        <tr><td class="kevin-said">Queue</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td class="kevin-said">Time interval</td><td><code>queued_at</code> (floor to 15 min) &mdash; also <code>assigned_at</code> / <code>created_at</code></td><td><code>Time Interval</code>, <code>Hour</code></td></tr>
         <tr><td>Date</td><td><code>DATE(queued_at)</code></td><td><code>Date</code>, <code>Week</code></td></tr>
       </tbody>
     </table>
 
     <h4>B. Queue report &mdash; measures ("the big five" + 2)</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
-        <tr><td>Offered (calls coming in)</td><td>derive: <code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td class="kevin-said">Offered (calls coming in)</td><td>derive: <code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
         <tr><td>Answered (to an agent)</td><td>derive: <code>COUNTIF(assigned_at IS NOT NULL)</code> / <code>agent_info_id</code> set</td><td><code>Calls Answered</code></td></tr>
-        <tr><td>Abandoned (offered &minus; answered)</td><td>derive: <code>queued_at IS NOT NULL AND assigned_at IS NULL</code></td><td><code>CallsAbandoned</code></td></tr>
-        <tr><td>Service Level (% answered within threshold)</td><td>derive: <code>COUNTIF((assigned_at - queued_at) &lt;= threshold) / COUNTIF(answered)</code> &mdash; threshold TBD</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
-        <tr><td>ASA (avg speed of answer)</td><td>derive: <code>AVG(assigned_at - queued_at)</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
-        <tr><td>Longest wait time (interval)</td><td>derive: <code>MAX(assigned_at - queued_at)</code> over answered</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td class="kevin-said">Abandoned (offered &minus; answered)</td><td>derive: <code>queued_at IS NOT NULL AND assigned_at IS NULL</code></td><td><code>CallsAbandoned</code></td></tr>
+        <tr><td class="kevin-said">Service Level (% answered within threshold)</td><td>derive: <code>COUNTIF((assigned_at - queued_at) &lt;= threshold) / COUNTIF(answered)</code> &mdash; threshold TBD</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td class="kevin-said">ASA (avg speed of answer)</td><td>derive: <code>AVG(assigned_at - queued_at)</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
+        <tr><td class="kevin-said">Longest wait time (interval)</td><td>derive: <code>MAX(assigned_at - queued_at)</code> over answered</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
         <tr><td>Max calls in queue / interval (nice-to-have)</td><td class="todo">concurrency calc over <code>queued_at</code>&hellip;<code>assigned_at</code> &mdash; hard from per-call rows</td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
         <tr><td>Abandon &lt;30s buckets / abandoned-by (collected, not critical)</td><td><code>disconnected_by</code> + wait math</td><td>partial: <code>Abandoned Hold Calls</code></td></tr>
       </tbody>
     </table>
 
     <h4>C. Agent report &mdash; dimensions</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Time interval</td><td><code>assigned_at</code> / <code>connected_at</code> (floor to 15 min)</td><td><code>Time Interval</code>, <code>Hour</code>, <code>Date</code></td></tr>
-        <tr><td>Queue</td><td><code>selected_menu_name</code> / <code>menu_path_name</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
-        <tr><td>Agent (the person)</td><td><code>agent_info_id</code> (31), <code>agent_info_name</code> ("Chandrika Veerkar")</td><td><code>Agent</code>, <code>AgentID</code>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
+        <tr><td class="kevin-said">Queue</td><td><code>selected_menu_name</code> / <code>menu_path_name</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
+        <tr><td class="kevin-said">Agent (the person)</td><td><code>agent_info_id</code> (31), <code>agent_info_name</code> ("Chandrika Veerkar")</td><td><code>Agent</code>, <code>AgentID</code>, <code>Team Name</code>, <code>PeripheralNumber</code></td></tr>
       </tbody>
     </table>
 
     <h4>D. Agent report &mdash; measures</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
-        <tr><td>Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td><code>Calls Answered</code>, <code>CallsHandled</code></td></tr>
-        <tr><td>Talk Time (on phone with member)</td><td><code>call_duration</code> (251s) &mdash; or <code>consumer_handle_durations_json.call_duration</code> (216s), confirm which</td><td><code>Avg Talktime</code>, <code>Total Talk Time</code></td></tr>
-        <tr><td>Work Time (after-call wrap-up)</td><td class="todo">no dedicated column &mdash; candidate: <code>updated_at</code> &minus; <code>ends_at</code> (93s in sample)</td><td><code>Avg WorkTime</code>, <code>Total Work Time</code></td></tr>
+        <tr><td class="kevin-said">Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td><code>Calls Answered</code>, <code>CallsHandled</code></td></tr>
+        <tr><td class="kevin-said">Talk Time (on phone with member)</td><td><code>call_duration</code> (251s) &mdash; or <code>consumer_handle_durations_json.call_duration</code> (216s), confirm which</td><td><code>Avg Talktime</code>, <code>Total Talk Time</code></td></tr>
+        <tr><td class="kevin-said">Work Time (after-call wrap-up)</td><td class="todo">no dedicated column &mdash; candidate: <code>updated_at</code> &minus; <code>ends_at</code> (93s in sample)</td><td><code>Avg WorkTime</code>, <code>Total Work Time</code></td></tr>
         <tr><td>Hold Time (member on hold)</td><td><code>hold_duration</code> (0s)</td><td><code>Avg HoldTime</code>, <code>Total Hold Time</code></td></tr>
-        <tr><td>Handle Time = Talk + Work + Hold</td><td>derive (blocked on Work Time)</td><td><code>AHT</code></td></tr>
+        <tr><td class="kevin-said">Handle Time = Talk + Work + Hold</td><td>derive (blocked on Work Time)</td><td><code>AHT</code></td></tr>
         <tr><td>Agent-Out calls (if available)</td><td><code>call_type</code> (only "Voice Inbound (IVR)" seen &mdash; confirm outbound value)</td><td><code>AgentOut Calls</code>, <code>AgentOut Calls TalkTime</code></td></tr>
-        <tr><td>Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td><code>TransferIn</code>, <code>TransferOut</code></td></tr>
+        <tr><td class="kevin-said">Transfer In / Transfer Out (if available)</td><td><code>transfers_count</code> (0) + direction inside <code>participants_json</code></td><td><code>TransferIn</code>, <code>TransferOut</code></td></tr>
         <tr><td>Logged-In / Available / Not-Ready (low value)</td><td class="todo">not in table &mdash; agent-state feed only</td><td><code>Total Logged In Time</code>, <code>Available Time</code>, <code>Not Ready Time</code></td></tr>
         <tr><td>RONA / redirect-on-no-answer (misc)</td><td class="todo">not in metadata &mdash; maybe <code>session_data_feeds</code> events</td><td><code>RONA</code></td></tr>
       </tbody>
     </table>
 
-    <h4>E. Virtual-agent performance (Kevin wants this included, voice + chat)</h4>
-    <table class="kevin">
+    <h4 class="kevin-said">E. Virtual-agent performance (Kevin wants this included, voice + chat)</h4>
+    <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td class="todo">not represented</td></tr>
@@ -415,7 +415,7 @@ flowchart LR
     </table>
 
     <h4>F. Grain, keys &amp; PII</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Stable interaction ID (distinct-call count)</td><td><code>id</code> (12175), <code>session_key</code> ("call-12175"), <code>call_uuid</code>, <code>provider_conversation_id</code></td><td><code>Unique ID</code></td></tr>
@@ -448,7 +448,7 @@ flowchart LR
 
     <h3>Coverage vs our columns</h3>
     <h4>Queue report</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>Kevin needs</th><th>Cisco Agent-Detail col</th><th>CCAI <code>metadata_current</code></th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>Queue dimension</td><td><code>PQ ID</code> / <code>PQ Name</code></td><td><code>selected_menu_id</code> / <code>selected_menu_name</code> / <code>menu_path_name</code></td><td>Derivable &mdash; needs menu &rarr; human-PQ cross-walk</td></tr>
@@ -472,7 +472,7 @@ flowchart LR
     <code>wait_duration</code> = 0 in the sample &mdash; confirm what it measures.</p></div>
 
     <h4>Agent report</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>Kevin needs</th><th>Cisco Agent-Detail col</th><th>CCAI <code>metadata_current</code></th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>Interval / queue / agent dims</td><td><code>Time Interval</code> / <code>PQ *</code> / <code>Agent</code> + <code>AgentID</code></td><td>timestamps / <code>selected_menu_*</code> / <code>agent_info_id</code> + <code>agent_info_name</code></td><td>Covered (agent-ID cross-walk needed)</td></tr>
@@ -489,7 +489,7 @@ flowchart LR
     </table>
 
     <h4>Virtual agent / containment</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>Kevin needs</th><th>CCAI source</th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td>Derivable</td></tr>
@@ -500,7 +500,7 @@ flowchart LR
     </table>
 
     <h4>Grain &amp; keys</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>Kevin needs</th><th>CCAI source</th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>Stable interaction ID (calls)</td><td><code>id</code> / <code>session_key</code> (<code>call-12175</code>) / <code>call_uuid</code> / <code>provider_conversation_id</code></td><td>Covered</td></tr>
@@ -511,7 +511,7 @@ flowchart LR
     </table>
 
     <h4>PII</h4>
-    <table class="kevin">
+    <table>
       <thead><tr><th>Kevin needs</th><th>Where it appears</th><th>Action</th></tr></thead>
       <tbody>
         <tr><td>Redact member phone number</td><td><code>session_data_feeds.consumer_number</code>, free-text <code>body</code></td><td>Mask before export</td></tr>
