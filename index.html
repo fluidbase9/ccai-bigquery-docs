@@ -65,6 +65,7 @@
     td.kevin-said, h4.kevin-said { font-weight:600; padding:7px 11px; }
     .cisco-present { background:#fb923c; color:#431407; padding:0 3px; border-radius:3px; }
     td.cisco-present { font-weight:600; padding:7px 11px; }
+    .record-kevin { background:#ddd6fe; color:#4c1d95; padding:0 3px; border-radius:3px; font-weight:600; }
     @media (max-width:900px){ nav.toc{display:none;} main{padding:24px;} }
   </style>
 </head>
@@ -82,6 +83,7 @@
     <a href="#map-query-to-cisco">6. metadata_current &rarr; report field</a>
     <a href="#requirements">6c. Kevin's requirements</a>
     <a href="#kevin-wants">&nbsp;&nbsp;&rarr; What Kevin wants (3-col)</a>
+    <a href="#record-example">6d. One record, fully expanded</a>
     <h2>Field maps</h2>
     <a href="#map-metadata">7. metadata &rarr; Webex CC</a>
     <a href="#map-session-feeds">8. session_data_feeds &rarr; Webex CC</a>
@@ -529,6 +531,212 @@ flowchart LR
     Four real gaps: (1) <strong>after-call Work Time</strong> has no clear column; (2) <strong>per-agent rows on
     transfers</strong> need a participant-grain table; (3) <strong>agent-state times</strong> (Logged-In / Available /
     Not-Ready) aren't in the export; (4) we're missing the <strong>Queue-interval report layout</strong> from Cisco.</p></div>
+
+    <!-- ================================================================ -->
+    <h2 id="record-example">6d. One record, fully expanded &mdash; <code>call-12175</code></h2>
+    <p>Every field of a single BigQuery row (<code>session_key = 'call-12175'</code>), flattened section &rarr; item &rarr;
+    field, exactly as it comes back from the nested-repeated query. This shows what one real interaction record actually
+    contains, field by field.</p>
+    <div class="callout"><p><strong>Legend:</strong>
+    <span class="record-kevin">violet</span> = field name Kevin asked for (or directly feeds a measure he asked for) on
+    the Sep 10 call. <span class="cisco-present">orange</span> = value already has a matching column in Cisco's
+    <code>SummaryDaily Reports (Agent-Detail)</code> export. Violet with no orange means Kevin wants it but Cisco's
+    Agent-Detail report doesn't carry it (queue-level measures like Offered/Service Level/ASA, VA metrics, and the
+    VA&rarr;HA / HA&rarr;HA transfer-time split all fall in this bucket &mdash; they're derived from these raw fields, not a
+    literal Cisco column).</p></div>
+    <table>
+      <thead><tr><th>Section</th><th>Item</th><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>agent_info</td><td>-</td><td>avatar_url</td><td>https://qat-640-aqd2ubm.uw1.ccaiplatform.com/assets2/default-profile.png</td></tr>
+        <tr><td>agent_info</td><td>-</td><td>email</td><td>c_cveerkar@costco.com</td></tr>
+        <tr><td>agent_info</td><td>-</td><td><span class="record-kevin">first_name</span></td><td><span class="cisco-present">Chandrika</span></td></tr>
+        <tr><td>agent_info</td><td>-</td><td><span class="record-kevin">id</span></td><td><span class="cisco-present">31</span></td></tr>
+        <tr><td>agent_info</td><td>-</td><td><span class="record-kevin">last_name</span></td><td><span class="cisco-present">Veerkar</span></td></tr>
+        <tr><td>agent_info</td><td>-</td><td><span class="record-kevin">name</span></td><td><span class="cisco-present">Chandrika Veerkar</span></td></tr>
+        <tr><td>answer_type</td><td>-</td><td>-</td><td>manual</td></tr>
+        <tr><td>assigned_at</td><td>-</td><td>-</td><td>2026-09-04T09:08:30.000-07:00</td></tr>
+        <tr><td>auto_session_summaries</td><td>0</td><td>participant_id</td><td>23804</td></tr>
+        <tr><td>auto_session_summaries</td><td>0</td><td>session_summary</td><td>situation / No issue identified / action / No action taken / resolution</td></tr>
+        <tr><td>auto_session_summaries</td><td>0</td><td>session_summary_sections.action</td><td>No action taken</td></tr>
+        <tr><td>auto_session_summaries</td><td>0</td><td>session_summary_sections.resolution</td><td>N</td></tr>
+        <tr><td>auto_session_summaries</td><td>0</td><td>session_summary_sections.situation</td><td>No issue identified</td></tr>
+        <tr><td>auto_session_summaries</td><td>0</td><td>user_id</td><td>31</td></tr>
+        <tr><td><span class="record-kevin">call_duration</span></td><td>-</td><td>-</td><td><span class="cisco-present">251</span></td></tr>
+        <tr><td><span class="record-kevin">call_type</span></td><td>-</td><td>-</td><td>Voice Inbound (IVR)</td></tr>
+        <tr><td>call_uuid</td><td>-</td><td>-</td><td>57272f16-15c2-4cac-b4b4-ca26...</td></tr>
+        <tr><td>connected_at</td><td>-</td><td>-</td><td>2026-09-04T09:05:53.000-07:00</td></tr>
+        <tr><td>consumer_handle_durations</td><td>0</td><td><span class="record-kevin">call_duration</span></td><td><span class="cisco-present">216</span></td></tr>
+        <tr><td>consumer_handle_durations</td><td>0</td><td>ended_at</td><td>2026-09-04T09:09:04.000-07:00</td></tr>
+        <tr><td>consumer_handle_durations</td><td>0</td><td><span class="record-kevin">hold_duration</span></td><td><span class="cisco-present">0</span></td></tr>
+        <tr><td>consumer_handle_durations</td><td>0</td><td>id</td><td>7489</td></tr>
+        <tr><td>consumer_handle_durations</td><td>0</td><td>started_at</td><td>2026-09-04T09:05:28.000-07:00</td></tr>
+        <tr><td>consumer_in_menu_durations</td><td>0</td><td>duration</td><td>21</td></tr>
+        <tr><td>consumer_in_menu_durations</td><td>0</td><td>ended_at</td><td>2026-09-04T09:05:49.000-07:00</td></tr>
+        <tr><td>consumer_in_menu_durations</td><td>0</td><td>event</td><td>finished</td></tr>
+        <tr><td>consumer_in_menu_durations</td><td>0</td><td>id</td><td>11406</td></tr>
+        <tr><td>consumer_in_menu_durations</td><td>0</td><td>lang</td><td>en</td></tr>
+        <tr><td>consumer_in_menu_durations</td><td>0</td><td>started_at</td><td>2026-09-04T09:05:28.000-07:00</td></tr>
+        <tr><td>created_at</td><td>-</td><td>-</td><td>2026-09-04T09:05:28.000-07:00</td></tr>
+        <tr><td><span class="record-kevin">deflection</span></td><td>-</td><td>-</td><td>no_deflection</td></tr>
+        <tr><td>disconnected_by</td><td>-</td><td>-</td><td>disconnected_by_end_user</td></tr>
+        <tr><td>end_user</td><td>-</td><td>id</td><td>3014</td></tr>
+        <tr><td>end_user</td><td>-</td><td>out_contact_id</td><td>003D700001H5yyMIAR</td></tr>
+        <tr><td>ends_at</td><td>-</td><td>-</td><td>2026-09-04T09:09:04.000-07:00</td></tr>
+        <tr><td>escalations</td><td>0</td><td>created_at</td><td>2026-09-04T09:08:10.000-07:00</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">escalated_at</span></td><td>2026-09-04T09:08:41.000-07:00</td></tr>
+        <tr><td>escalations</td><td>0</td><td>from_menu_path.items_count</td><td>3</td></tr>
+        <tr><td>escalations</td><td>0</td><td>from_menu_path.materialized_path</td><td>2/10/34</td></tr>
+        <tr><td>escalations</td><td>0</td><td>from_menu_path.name</td><td>Routing Queues/Steering Menu...</td></tr>
+        <tr><td>escalations</td><td>0</td><td>from_virtual_agent.avatar_url</td><td>https://prod-ujet-server.prod.svc.cluster.local/assets2/default-virtual-agent-avatar-1.png</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">from_virtual_agent.id</span></td><td>12</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">from_virtual_agent.name</span></td><td>QAT-Voice-Member-Self-Service</td></tr>
+        <tr><td>escalations</td><td>0</td><td>id</td><td>5849</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">reason</span></td><td>by_virtual_agent</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">status</span></td><td>escalated</td></tr>
+        <tr><td>escalations</td><td>0</td><td>to_agent.avatar_url</td><td>https://qat-640-aqd2ubm.uw1.ccaiplatform.com/assets2/default-profile.png</td></tr>
+        <tr><td>escalations</td><td>0</td><td>to_agent.email</td><td>c_cveerkar@costco.com</td></tr>
+        <tr><td>escalations</td><td>0</td><td>to_agent.first_name</td><td>Chandrika</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">to_agent.id</span></td><td>31</td></tr>
+        <tr><td>escalations</td><td>0</td><td>to_agent.last_name</td><td>Veerkar</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">to_agent.name</span></td><td>Chandrika Veerkar</td></tr>
+        <tr><td>escalations</td><td>0</td><td>to_menu_path.items_count</td><td>3</td></tr>
+        <tr><td>escalations</td><td>0</td><td>to_menu_path.materialized_path</td><td>2/6/8</td></tr>
+        <tr><td>escalations</td><td>0</td><td><span class="record-kevin">to_menu_path.name</span></td><td>Routing Queues/ECOMM General...</td></tr>
+        <tr><td>fail_reason</td><td>-</td><td>-</td><td>nothing</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">acw_duration</span></td><td><span class="cisco-present">0</span></td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">agent_id</span></td><td><span class="cisco-present">31</span></td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>assigned_connection_duration</td><td>10</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>barged</td><td>false</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>bcw_duration</td><td>0</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">call_duration</span></td><td><span class="cisco-present">24</span></td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>ended_at</td><td>2026-09-04T09:09:04.000-07:00</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">hold_duration</span></td><td><span class="cisco-present">0</span></td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>id</td><td>3580</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>lang</td><td>en</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">menu_path</span></td><td><span class="cisco-present">Routing Queues/ECOMM General...</span></td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">menu_path_id</span></td><td><span class="cisco-present">6</span></td></tr>
+        <tr><td>handle_durations</td><td>0</td><td>started_at</td><td>2026-09-04T09:08:40.000-07:00</td></tr>
+        <tr><td>handle_durations</td><td>0</td><td><span class="record-kevin">transfer</span></td><td><span class="cisco-present">false</span></td></tr>
+        <tr><td>handle_durations</td><td>1</td><td><span class="record-kevin">acw_duration</span></td><td><span class="cisco-present">90</span></td></tr>
+        <tr><td>handle_durations</td><td>1</td><td><span class="record-kevin">agent_id</span></td><td><span class="cisco-present">31</span></td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>assigned_connection_duration</td><td>0</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>barged</td><td>false</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>bcw_duration</td><td>0</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td><span class="record-kevin">call_duration</span></td><td><span class="cisco-present">0</span></td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>ended_at</td><td>2026-09-04T09:10:34.000-07:00</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>id</td><td>3581</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>lang</td><td>en</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td><span class="record-kevin">menu_path</span></td><td><span class="cisco-present">Routing Queues/ECOMM General...</span></td></tr>
+        <tr><td>handle_durations</td><td>1</td><td><span class="record-kevin">menu_path_id</span></td><td><span class="cisco-present">6</span></td></tr>
+        <tr><td>handle_durations</td><td>1</td><td>started_at</td><td>2026-09-04T09:09:04.000-07:00</td></tr>
+        <tr><td>handle_durations</td><td>1</td><td><span class="record-kevin">transfer</span></td><td><span class="cisco-present">false</span></td></tr>
+        <tr><td>has_feedback</td><td>-</td><td>-</td><td>false</td></tr>
+        <tr><td><span class="record-kevin">hold_duration</span></td><td>-</td><td>-</td><td><span class="cisco-present">0</span></td></tr>
+        <tr><td>id</td><td>-</td><td>-</td><td>12175</td></tr>
+        <tr><td>is_out_ticket_account</td><td>-</td><td>-</td><td>true</td></tr>
+        <tr><td>lang</td><td>-</td><td>-</td><td>en</td></tr>
+        <tr><td>menu_path</td><td>-</td><td>items_count</td><td>3</td></tr>
+        <tr><td>menu_path</td><td>-</td><td>materialized_path</td><td>2/6/8</td></tr>
+        <tr><td>menu_path</td><td>-</td><td><span class="record-kevin">name</span></td><td><span class="cisco-present">Routing Queues/ECOMM General...</span></td></tr>
+        <tr><td>offer_events</td><td>0</td><td>casting_time</td><td>2026-09-04T09:08:14.000-07:00</td></tr>
+        <tr><td>offer_events</td><td>0</td><td>group</td><td>Group 1</td></tr>
+        <tr><td>offer_events</td><td>1</td><td>casting_time</td><td>2026-09-04T09:08:21.000-07:00</td></tr>
+        <tr><td>offer_events</td><td>1</td><td>group</td><td>Group 3</td></tr>
+        <tr><td><span class="record-kevin">offer_type</span></td><td>-</td><td>-</td><td>cascade</td></tr>
+        <tr><td>out_ticket_id</td><td>-</td><td>-</td><td>003D700001H5yyMIAR</td></tr>
+        <tr><td>out_ticket_url</td><td>-</td><td>-</td><td>https://costcowholesalecorporation2--itmscqa.sandbox.my.salesforce.com/lightning/r/Contact/003D700001H5yyMIAR/view</td></tr>
+        <tr><td>participants</td><td>0</td><td>call_duration</td><td>216</td></tr>
+        <tr><td>participants</td><td>0</td><td>call_id</td><td>12175</td></tr>
+        <tr><td>participants</td><td>0</td><td>connected_at</td><td>2026-09-04T09:05:28.000-07:00</td></tr>
+        <tr><td>participants</td><td>0</td><td>end_user_id</td><td>3014</td></tr>
+        <tr><td>participants</td><td>0</td><td>ended_at</td><td>2026-09-04T09:09:04.000-07:00</td></tr>
+        <tr><td>participants</td><td>0</td><td><span class="record-kevin">entry_type</span></td><td>queue_or_transfer</td></tr>
+        <tr><td>participants</td><td>0</td><td>fail_reason</td><td>nothing</td></tr>
+        <tr><td>participants</td><td>0</td><td>id</td><td>23802</td></tr>
+        <tr><td>participants</td><td>0</td><td>phone_number</td><td>+918867813818</td></tr>
+        <tr><td>participants</td><td>0</td><td>status</td><td>finished</td></tr>
+        <tr><td>participants</td><td>0</td><td>type</td><td>end_user</td></tr>
+        <tr><td>participants</td><td>1</td><td><span class="record-kevin">call_duration</span></td><td>137</td></tr>
+        <tr><td>participants</td><td>1</td><td>call_id</td><td>12175</td></tr>
+        <tr><td>participants</td><td>1</td><td>connected_at</td><td>2026-09-04T09:05:53.000-07:00</td></tr>
+        <tr><td>participants</td><td>1</td><td>ended_at</td><td>2026-09-04T09:08:10.000-07:00</td></tr>
+        <tr><td>participants</td><td>1</td><td><span class="record-kevin">entry_type</span></td><td>queue_or_transfer</td></tr>
+        <tr><td>participants</td><td>1</td><td>fail_reason</td><td>nothing</td></tr>
+        <tr><td>participants</td><td>1</td><td>id</td><td>23803</td></tr>
+        <tr><td>participants</td><td>1</td><td>status</td><td>finished</td></tr>
+        <tr><td>participants</td><td>1</td><td><span class="record-kevin">type</span></td><td>virtual_agent</td></tr>
+        <tr><td>participants</td><td>1</td><td>virtual_agent.conversation_id</td><td>119dw_UDr9XTGyfXuNujcf2Fw</td></tr>
+        <tr><td>participants</td><td>1</td><td><span class="record-kevin">virtual_agent_id</span></td><td>12</td></tr>
+        <tr><td>participants</td><td>1</td><td>virtual_agent_params.ani</td><td>+918867813818</td></tr>
+        <tr><td>participants</td><td>1</td><td>virtual_agent_params.callId</td><td>12175</td></tr>
+        <tr><td>participants</td><td>1</td><td>virtual_agent_params.channel</td><td>call</td></tr>
+        <tr><td>participants</td><td>1</td><td>virtual_agent_params.dnis</td><td>+18153935508</td></tr>
+        <tr><td>participants</td><td>2</td><td>agent_assist.conversation_id</td><td>081vdMdB1AOSuyHdJrSzo5v5Q</td></tr>
+        <tr><td>participants</td><td>2</td><td><span class="record-kevin">call_duration</span></td><td><span class="cisco-present">24</span></td></tr>
+        <tr><td>participants</td><td>2</td><td>call_id</td><td>12175</td></tr>
+        <tr><td>participants</td><td>2</td><td>connected_at</td><td>2026-09-04T09:08:40.000-07:00</td></tr>
+        <tr><td>participants</td><td>2</td><td>email</td><td>c_cveerkar@costco.com</td></tr>
+        <tr><td>participants</td><td>2</td><td>ended_at</td><td>2026-09-04T09:09:04.000-07:00</td></tr>
+        <tr><td>participants</td><td>2</td><td><span class="record-kevin">entry_type</span></td><td>queue_or_transfer</td></tr>
+        <tr><td>participants</td><td>2</td><td>fail_reason</td><td>nothing</td></tr>
+        <tr><td>participants</td><td>2</td><td><span class="record-kevin">first_name</span></td><td>Chandrika</td></tr>
+        <tr><td>participants</td><td>2</td><td>id</td><td>23804</td></tr>
+        <tr><td>participants</td><td>2</td><td><span class="record-kevin">last_name</span></td><td>Veerkar</td></tr>
+        <tr><td>participants</td><td>2</td><td>status</td><td>finished</td></tr>
+        <tr><td>participants</td><td>2</td><td><span class="record-kevin">type</span></td><td>agent</td></tr>
+        <tr><td>participants</td><td>2</td><td><span class="record-kevin">user_id</span></td><td>31</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.0].id</td><td>10</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.0].name</td><td>US Ecomm Spanish Agents</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.1].id</td><td>13</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.1].name</td><td>PR Logistics English + Spanish</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.2].id</td><td>14</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.2].name</td><td>PR Logistics Spanish</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.3].id</td><td>19</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.3].name</td><td>PR Driver Gate Spanish Agents</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.4].id</td><td>23</td></tr>
+        <tr><td>participants</td><td>2</td><td>teams[2.4].name</td><td>QA Testing Team - Chat</td></tr>
+        <tr><td>queue_priority_level</td><td>-</td><td>-</td><td>0</td></tr>
+        <tr><td><span class="record-kevin">queued_at</span></td><td>-</td><td>-</td><td><span class="cisco-present">2026-09-04T09:08:14.000-07:00</span></td></tr>
+        <tr><td>recording_permission</td><td>-</td><td>-</td><td>not_asked</td></tr>
+        <tr><td>recordings</td><td>0</td><td>call_id</td><td>12175</td></tr>
+        <tr><td>recordings</td><td>0</td><td>duration</td><td>137</td></tr>
+        <tr><td>recordings</td><td>0</td><td>id</td><td>8949</td></tr>
+        <tr><td>recordings</td><td>0</td><td><span class="record-kevin">recording_type</span></td><td>virtual_agent</td></tr>
+        <tr><td>recordings</td><td>0</td><td>started_at</td><td>2026-09-04T09:05:54.000-07:00</td></tr>
+        <tr><td>selected_menu</td><td>-</td><td>deleted</td><td>false</td></tr>
+        <tr><td>selected_menu</td><td>-</td><td>hidden</td><td>false</td></tr>
+        <tr><td>selected_menu</td><td>-</td><td><span class="record-kevin">id</span></td><td><span class="cisco-present">8</span></td></tr>
+        <tr><td>selected_menu</td><td>-</td><td>menu_type</td><td>ivr_menu</td></tr>
+        <tr><td>selected_menu</td><td>-</td><td><span class="record-kevin">name</span></td><td><span class="cisco-present">US_ECOMM_General_CB</span></td></tr>
+        <tr><td>selected_menu</td><td>-</td><td>parent_id</td><td>6</td></tr>
+        <tr><td>selected_menu</td><td>-</td><td>position</td><td>1</td></tr>
+        <tr><td><span class="record-kevin">session_type</span></td><td>-</td><td>-</td><td>Voice Inbound (IVR)</td></tr>
+        <tr><td>session_type_v2</td><td>-</td><td>-</td><td>Voice Inbound (IVR)</td></tr>
+        <tr><td><span class="record-kevin">status</span></td><td>-</td><td>-</td><td>finished</td></tr>
+        <tr><td>support_number</td><td>-</td><td>-</td><td>+18153935508</td></tr>
+        <tr><td>updated_at</td><td>-</td><td>-</td><td>2026-09-04T09:10:37.000-07:00</td></tr>
+        <tr><td>verified</td><td>-</td><td>-</td><td>false</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">call_duration</span></td><td>137</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>ended_at</td><td>2026-09-04T09:08:10.000-07:00</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">escalation_reason</span></td><td>by_virtual_agent</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">fallback_response_count</span></td><td>0</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">finish_reason</span></td><td>escalated</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>id</td><td>7908</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>initiated_by</td><td>end_user</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>lang</td><td>en</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>menu_path</td><td>Routing Queues/Steering Menu...</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>menu_path_id</td><td>35</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">response_count</span></td><td>23</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>started_at</td><td>2026-09-04T09:05:53.000-07:00</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">transfer</span></td><td>false</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td>virtual_agent.avatar_url</td><td>https://prod-ujet-server.prod.svc.cluster.local/assets2/default-virtual-agent-avatar-1.png</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">virtual_agent.id</span></td><td>12</td></tr>
+        <tr><td>virtual_agent_handle_durations</td><td>0</td><td><span class="record-kevin">virtual_agent.name</span></td><td>QAT-Voice-Member-Self-Service</td></tr>
+        <tr><td>voicemail_reason</td><td>-</td><td>-</td><td>not_voicemail</td></tr>
+        <tr><td>voip_provider</td><td>-</td><td>-</td><td>deprecated</td></tr>
+        <tr><td><span class="record-kevin">wait_duration</span></td><td>-</td><td>-</td><td>0</td></tr>
+      </tbody>
+    </table>
 
     <!-- ================================================================ -->
     <h2 id="map-metadata">7. <code>metadata</code> &rarr; Webex CC</h2>
