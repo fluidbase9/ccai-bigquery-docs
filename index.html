@@ -154,42 +154,46 @@ flowchart LR
     <h2 id="cisco-report">5. Cisco report fields &mdash; SummaryDaily Reports (Agent-Detail)</h2>
     <p>Target Excel/Sheets export: <code>SummaryDaily Reports(Agent-Detail)</code>. 33 columns, one row per
     agent &times; time interval. Column letters are the spreadsheet positions.</p>
+    <div class="callout"><p><strong>New column:</strong> <em>BigQuery field</em> = the source column in
+    <code>ccaas_raw_lab.metadata_current</code> that feeds this Cisco field (from the mapping in
+    <a href="#map-query-to-cisco">section 6</a>). <span class="record-kevin">Violet</span> = Kevin asked for this on
+    the Sep 10 call.</p></div>
     <table>
-      <thead><tr><th>#</th><th>Col</th><th>Field</th><th>Kind</th><th>Sample</th><th>Notes</th></tr></thead>
+      <thead><tr><th>#</th><th>Col</th><th>Field</th><th>Kind</th><th>Sample</th><th>BigQuery field</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>A</td><td><code>LOB</code></td><td>dim</td><td>BDUS</td><td>line of business</td></tr>
-        <tr><td>2</td><td>B</td><td><code>Week</code></td><td>dim</td><td>29</td><td>ISO week number</td></tr>
-        <tr><td>3</td><td>C</td><td><code>Date</code></td><td>dim</td><td>07/14/2026</td><td>MM/DD/YYYY</td></tr>
-        <tr><td>4</td><td>D</td><td><code>PQ ID</code></td><td>dim</td><td>5059</td><td>precision queue ID</td></tr>
-        <tr><td>5</td><td>E</td><td><code>PQ Name</code></td><td>dim</td><td>US_BD</td><td>precision queue name</td></tr>
-        <tr><td>6</td><td>F</td><td><code>Team Name</code></td><td>dim</td><td>US_YAK_MS7</td><td class="todo">TBD</td></tr>
-        <tr><td>7</td><td>G</td><td><code>Agent</code></td><td>dim</td><td>Elizabeth_Pinon</td><td>First_Last</td></tr>
-        <tr><td>8</td><td>H</td><td><code>Hour</code></td><td>dim</td><td>5</td><td>hour of day (0&ndash;23)</td></tr>
-        <tr><td>9</td><td>I</td><td><code>Time Interval</code></td><td>dim</td><td>5:45:00</td><td>15-min interval start</td></tr>
-        <tr><td>10</td><td>J</td><td><code>Unique ID</code></td><td>key</td><td>Daily_Agent_29_20260714-0545_BDUS_5059_8748</td><td>Period_Source_Week_YYYYMMDD-HHMM_LOB_PQID_AgentID</td></tr>
-        <tr><td>11</td><td>K</td><td><code>Period</code></td><td>dim</td><td>Daily</td><td>grain label</td></tr>
-        <tr><td>12</td><td>L</td><td><code>Source</code></td><td>dim</td><td>Agent</td><td class="todo">TBD</td></tr>
-        <tr><td>13</td><td>M</td><td><code>AgentID</code></td><td>key</td><td>8748</td><td>Cisco agent ID</td></tr>
-        <tr><td>14</td><td>N</td><td><code>PeripheralNumber</code></td><td>key</td><td>623040</td><td>peripheral / login ID</td></tr>
-        <tr><td>15</td><td>O</td><td><code>AgentOut Calls</code></td><td>measure</td><td>0</td><td>count</td></tr>
-        <tr><td>16</td><td>P</td><td><code>AgentOut Calls TalkTime</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
-        <tr><td>17</td><td>Q</td><td><code>Calls Answered</code></td><td>measure</td><td>0</td><td>count</td></tr>
-        <tr><td>18</td><td>R</td><td><code>CallsAbandoned</code></td><td>measure</td><td>0</td><td>count</td></tr>
-        <tr><td>19</td><td>S</td><td><code>Avg Talktime</code></td><td>measure</td><td>0:02:22</td><td>HH:MM:SS</td></tr>
-        <tr><td>20</td><td>T</td><td><code>Avg WorkTime</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
-        <tr><td>21</td><td>U</td><td><code>Avg HoldTime</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
-        <tr><td>22</td><td>V</td><td><code>AHT</code></td><td>measure</td><td>0:00:00</td><td>avg handle time</td></tr>
-        <tr><td>23</td><td>W</td><td><code>TransferIn</code></td><td>measure</td><td>0</td><td>count</td></tr>
-        <tr><td>24</td><td>X</td><td><code>TransferOut</code></td><td>measure</td><td>0</td><td>count</td></tr>
-        <tr><td>25</td><td>Y</td><td><code>Available Time</code></td><td>measure</td><td>0:08:21</td><td>HH:MM:SS</td></tr>
-        <tr><td>26</td><td>Z</td><td><code>Not Ready Time</code></td><td>measure</td><td>0:01:45</td><td>HH:MM:SS</td></tr>
-        <tr><td>27</td><td>AA</td><td><code>RONA</code></td><td>measure</td><td>0</td><td>redirect on no answer count</td></tr>
-        <tr><td>28</td><td>AB</td><td><code>Abandoned Hold Calls</code></td><td>measure</td><td>0</td><td>count</td></tr>
-        <tr><td>29</td><td>AC</td><td><code>Total Logged In Time</code></td><td>measure</td><td>0:07:17</td><td>HH:MM:SS</td></tr>
-        <tr><td>30</td><td>AD</td><td><code>Total Work Time</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
-        <tr><td>31</td><td>AE</td><td><code>CallsHandled</code></td><td>measure</td><td>1</td><td>count</td></tr>
-        <tr><td>32</td><td>AF</td><td><code>Total Talk Time</code></td><td>measure</td><td>0:02:22</td><td>HH:MM:SS</td></tr>
-        <tr><td>33</td><td>AG</td><td><code>Total Hold Time</code></td><td>measure</td><td>0:00:00</td><td>HH:MM:SS</td></tr>
+        <tr><td>1</td><td>A</td><td><code>LOB</code></td><td>dim</td><td>BDUS</td><td class="todo">none (const / derive)</td><td>line of business</td></tr>
+        <tr><td>2</td><td>B</td><td><code>Week</code></td><td>dim</td><td>29</td><td><code>created_at</code></td><td>ISO week number</td></tr>
+        <tr><td>3</td><td>C</td><td><code>Date</code></td><td>dim</td><td>07/14/2026</td><td><code>created_at</code></td><td>MM/DD/YYYY</td></tr>
+        <tr><td>4</td><td>D</td><td><code>PQ ID</code></td><td>dim</td><td>5059</td><td><code class="record-kevin">selected_menu_id</code></td><td>precision queue ID</td></tr>
+        <tr><td>5</td><td>E</td><td><code>PQ Name</code></td><td>dim</td><td>US_BD</td><td><code class="record-kevin">selected_menu_name</code></td><td>precision queue name</td></tr>
+        <tr><td>6</td><td>F</td><td><code>Team Name</code></td><td>dim</td><td>US_YAK_MS7</td><td class="todo">none</td><td class="todo">TBD</td></tr>
+        <tr><td>7</td><td>G</td><td><code>Agent</code></td><td>dim</td><td>Elizabeth_Pinon</td><td><code class="record-kevin">agent_info_name</code></td><td>First_Last</td></tr>
+        <tr><td>8</td><td>H</td><td><code>Hour</code></td><td>dim</td><td>5</td><td><code>created_at</code></td><td>hour of day (0&ndash;23)</td></tr>
+        <tr><td>9</td><td>I</td><td><code>Time Interval</code></td><td>dim</td><td>5:45:00</td><td><code class="record-kevin">queued_at</code></td><td>15-min interval start</td></tr>
+        <tr><td>10</td><td>J</td><td><code>Unique ID</code></td><td>key</td><td>Daily_Agent_29_20260714-0545_BDUS_5059_8748</td><td class="todo">composite (no single column)</td><td>Period_Source_Week_YYYYMMDD-HHMM_LOB_PQID_AgentID</td></tr>
+        <tr><td>11</td><td>K</td><td><code>Period</code></td><td>dim</td><td>Daily</td><td class="todo">const</td><td>grain label</td></tr>
+        <tr><td>12</td><td>L</td><td><code>Source</code></td><td>dim</td><td>Agent</td><td class="todo">const</td><td>TBD</td></tr>
+        <tr><td>13</td><td>M</td><td><code>AgentID</code></td><td>key</td><td>8748</td><td><code class="record-kevin">agent_info_id</code></td><td>Cisco agent ID</td></tr>
+        <tr><td>14</td><td>N</td><td><code>PeripheralNumber</code></td><td>key</td><td>623040</td><td class="todo">none</td><td>peripheral / login ID</td></tr>
+        <tr><td>15</td><td>O</td><td><code>AgentOut Calls</code></td><td>measure</td><td>0</td><td><code>call_type</code></td><td>count</td></tr>
+        <tr><td>16</td><td>P</td><td><code>AgentOut Calls TalkTime</code></td><td>measure</td><td>0:00:00</td><td><code>call_duration</code> + <code>call_type</code></td><td>HH:MM:SS</td></tr>
+        <tr><td>17</td><td>Q</td><td><code>Calls Answered</code></td><td>measure</td><td>0</td><td><code class="record-kevin">connected_at</code> / <code>status</code></td><td>count</td></tr>
+        <tr><td>18</td><td>R</td><td><code>CallsAbandoned</code></td><td>measure</td><td>0</td><td><code class="record-kevin">status</code> / <code>fail_reason</code> / <code>connected_at</code></td><td>count</td></tr>
+        <tr><td>19</td><td>S</td><td><code>Avg Talktime</code></td><td>measure</td><td>0:02:22</td><td><code class="record-kevin">call_duration</code></td><td>HH:MM:SS</td></tr>
+        <tr><td>20</td><td>T</td><td><code>Avg WorkTime</code></td><td>measure</td><td>0:00:00</td><td class="todo"><code class="record-kevin">handle_durations.acw_duration</code> (none in flat <code>metadata_current</code>)</td><td>HH:MM:SS</td></tr>
+        <tr><td>21</td><td>U</td><td><code>Avg HoldTime</code></td><td>measure</td><td>0:00:00</td><td><code class="record-kevin">hold_duration</code></td><td>HH:MM:SS</td></tr>
+        <tr><td>22</td><td>V</td><td><code>AHT</code></td><td>measure</td><td>0:00:00</td><td><code class="record-kevin">call_duration</code> + <code class="record-kevin">hold_duration</code> + work</td><td>avg handle time</td></tr>
+        <tr><td>23</td><td>W</td><td><code>TransferIn</code></td><td>measure</td><td>0</td><td><code class="record-kevin">transfers_count</code> / <code>participants_json</code></td><td>count</td></tr>
+        <tr><td>24</td><td>X</td><td><code>TransferOut</code></td><td>measure</td><td>0</td><td><code class="record-kevin">transfers_count</code> / <code>participants_json</code></td><td>count</td></tr>
+        <tr><td>25</td><td>Y</td><td><code>Available Time</code></td><td>measure</td><td>0:08:21</td><td class="todo">none</td><td>HH:MM:SS</td></tr>
+        <tr><td>26</td><td>Z</td><td><code>Not Ready Time</code></td><td>measure</td><td>0:01:45</td><td class="todo">none</td><td>HH:MM:SS</td></tr>
+        <tr><td>27</td><td>AA</td><td><code>RONA</code></td><td>measure</td><td>0</td><td class="todo">none</td><td>redirect on no answer count</td></tr>
+        <tr><td>28</td><td>AB</td><td><code>Abandoned Hold Calls</code></td><td>measure</td><td>0</td><td class="todo">none</td><td>count</td></tr>
+        <tr><td>29</td><td>AC</td><td><code>Total Logged In Time</code></td><td>measure</td><td>0:07:17</td><td class="todo">none</td><td>HH:MM:SS</td></tr>
+        <tr><td>30</td><td>AD</td><td><code>Total Work Time</code></td><td>measure</td><td>0:00:00</td><td class="todo"><code class="record-kevin">handle_durations.acw_duration</code> (none in flat <code>metadata_current</code>)</td><td>HH:MM:SS</td></tr>
+        <tr><td>31</td><td>AE</td><td><code>CallsHandled</code></td><td>measure</td><td>1</td><td><code class="record-kevin">id</code> / <code>connected_at</code></td><td>count</td></tr>
+        <tr><td>32</td><td>AF</td><td><code>Total Talk Time</code></td><td>measure</td><td>0:02:22</td><td><code class="record-kevin">call_duration</code></td><td>HH:MM:SS</td></tr>
+        <tr><td>33</td><td>AG</td><td><code>Total Hold Time</code></td><td>measure</td><td>0:00:00</td><td><code class="record-kevin">hold_duration</code></td><td>HH:MM:SS</td></tr>
       </tbody>
     </table>
     <div class="callout"><p>Grain of this report = <strong>agent &times; 15-minute interval &times; precision queue</strong>,
