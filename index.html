@@ -61,6 +61,8 @@
       overflow:auto; background:#fff; }
     .diagram .mermaid svg { max-width:100%; height:auto; max-height:520px; }
     .diagram .mermaid { font-size:13px; }
+    table.kevin td:first-child { background:#dcfce7; color:#14532d; font-weight:600; }
+    .kevin-said { background:#dcfce7; color:#14532d; padding:0 3px; border-radius:3px; }
     @media (max-width:900px){ nav.toc{display:none;} main{padding:24px;} }
   </style>
 </head>
@@ -322,21 +324,21 @@ flowchart LR
     <ol>
       <li><strong>Queue report</strong> &mdash; nothing to do with individual agents.
         <ul>
-          <li>Dimensions: <strong>Queue</strong> and <strong>time interval</strong> (date is split out but is the same axis).</li>
-          <li>The "big five" measures: <strong>Offered</strong>, <strong>Answered</strong>, <strong>Abandoned</strong>
-          (roughly offered &minus; answered), <strong>Service Level</strong> (% of answered calls answered within a
-          configured threshold), <strong>ASA</strong> (average speed of answer &mdash; how long answered calls waited).</li>
-          <li>6th: <strong>Longest wait time</strong> in the interval (for answered calls).</li>
-          <li>Nice-to-have: <strong>max calls in queue</strong> at each interval.</li>
+          <li>Dimensions: <strong class="kevin-said">Queue</strong> and <strong class="kevin-said">time interval</strong> (date is split out but is the same axis).</li>
+          <li>The "big five" measures: <strong class="kevin-said">Offered</strong>, <strong class="kevin-said">Answered</strong>, <strong class="kevin-said">Abandoned</strong>
+          (roughly offered &minus; answered), <strong class="kevin-said">Service Level</strong> (% of answered calls answered within a
+          configured threshold), <strong class="kevin-said">ASA</strong> (average speed of answer &mdash; how long answered calls waited).</li>
+          <li>6th: <strong class="kevin-said">Longest wait time</strong> in the interval (for answered calls).</li>
+          <li>Nice-to-have: <strong class="kevin-said">max calls in queue</strong> at each interval.</li>
           <li>Collected but not critical: abandon-within-30s buckets, abandoned-by-agent vs abandoned-by-member.</li>
         </ul>
       </li>
       <li><strong>Agent report</strong>.
         <ul>
-          <li>Dimensions: <strong>time interval</strong>, <strong>queue</strong>, <strong>agent</strong>.</li>
-          <li>Core measures (the ones they actually need): <strong>Calls Answered</strong>, <strong>Talk Time</strong>,
-          <strong>Work Time</strong> (after-call wrap-up), <strong>Hold Time</strong>.
-          Talk + Work + Hold = <strong>Handle Time (AHT)</strong>.</li>
+          <li>Dimensions: <strong class="kevin-said">time interval</strong>, <strong class="kevin-said">queue</strong>, <strong class="kevin-said">agent</strong>.</li>
+          <li>Core measures (the ones they actually need): <strong class="kevin-said">Calls Answered</strong>, <strong class="kevin-said">Talk Time</strong>,
+          <strong class="kevin-said">Work Time</strong> (after-call wrap-up), <strong class="kevin-said">Hold Time</strong>.
+          Talk + Work + Hold = <strong class="kevin-said">Handle Time (AHT)</strong>.</li>
           <li>"Take it if we have it": Agent-Out calls, Transfer In / Transfer Out (historically unreliable).</li>
           <li>Low value: Logged-In / Available / Not-Ready time &mdash; double-counts when an agent is logged into
           multiple queues (every logged-in second counts on every queue).</li>
@@ -351,7 +353,7 @@ flowchart LR
     <code>SummaryDaily Reports</code> export. <span class="todo">italic grey</span> = not available on that side.</p>
 
     <h4>A. Queue report &mdash; dimensions</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Queue</td><td><code>selected_menu_id</code>, <code>selected_menu_name</code>, <code>menu_path_name</code>, <code>menu_path_materialized_path</code></td><td><code>PQ ID</code>, <code>PQ Name</code></td></tr>
@@ -361,7 +363,7 @@ flowchart LR
     </table>
 
     <h4>B. Queue report &mdash; measures ("the big five" + 2)</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Offered (calls coming in)</td><td>derive: <code>COUNT(*)</code> where <code>queued_at IS NOT NULL</code></td><td class="todo">not in Agent-Detail &mdash; in Queue report</td></tr>
@@ -376,7 +378,7 @@ flowchart LR
     </table>
 
     <h4>C. Agent report &mdash; dimensions</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Time interval</td><td><code>assigned_at</code> / <code>connected_at</code> (floor to 15 min)</td><td><code>Time Interval</code>, <code>Hour</code>, <code>Date</code></td></tr>
@@ -386,7 +388,7 @@ flowchart LR
     </table>
 
     <h4>D. Agent report &mdash; measures</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Calls Answered (per agent, row = credit)</td><td>derive: <code>COUNT</code> rows per agent where connected</td><td><code>Calls Answered</code>, <code>CallsHandled</code></td></tr>
@@ -402,7 +404,7 @@ flowchart LR
     </table>
 
     <h4>E. Virtual-agent performance (Kevin wants this included, voice + chat)</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td class="todo">not represented</td></tr>
@@ -413,7 +415,7 @@ flowchart LR
     </table>
 
     <h4>F. Grain, keys &amp; PII</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>What Kevin wants</th><th>CCAI (BigQuery) &mdash; <code>metadata_current</code></th><th>Cisco &mdash; SummaryDaily report</th></tr></thead>
       <tbody>
         <tr><td>Stable interaction ID (distinct-call count)</td><td><code>id</code> (12175), <code>session_key</code> ("call-12175"), <code>call_uuid</code>, <code>provider_conversation_id</code></td><td><code>Unique ID</code></td></tr>
@@ -446,7 +448,7 @@ flowchart LR
 
     <h3>Coverage vs our columns</h3>
     <h4>Queue report</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>Kevin needs</th><th>Cisco Agent-Detail col</th><th>CCAI <code>metadata_current</code></th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>Queue dimension</td><td><code>PQ ID</code> / <code>PQ Name</code></td><td><code>selected_menu_id</code> / <code>selected_menu_name</code> / <code>menu_path_name</code></td><td>Derivable &mdash; needs menu &rarr; human-PQ cross-walk</td></tr>
@@ -470,7 +472,7 @@ flowchart LR
     <code>wait_duration</code> = 0 in the sample &mdash; confirm what it measures.</p></div>
 
     <h4>Agent report</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>Kevin needs</th><th>Cisco Agent-Detail col</th><th>CCAI <code>metadata_current</code></th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>Interval / queue / agent dims</td><td><code>Time Interval</code> / <code>PQ *</code> / <code>Agent</code> + <code>AgentID</code></td><td>timestamps / <code>selected_menu_*</code> / <code>agent_info_id</code> + <code>agent_info_name</code></td><td>Covered (agent-ID cross-walk needed)</td></tr>
@@ -487,7 +489,7 @@ flowchart LR
     </table>
 
     <h4>Virtual agent / containment</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>Kevin needs</th><th>CCAI source</th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>VA interactions entered</td><td><code>participants_json</code> (<code>virtual_agent</code> entries), <code>channel</code></td><td>Derivable</td></tr>
@@ -498,7 +500,7 @@ flowchart LR
     </table>
 
     <h4>Grain &amp; keys</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>Kevin needs</th><th>CCAI source</th><th>Status</th></tr></thead>
       <tbody>
         <tr><td>Stable interaction ID (calls)</td><td><code>id</code> / <code>session_key</code> (<code>call-12175</code>) / <code>call_uuid</code> / <code>provider_conversation_id</code></td><td>Covered</td></tr>
@@ -509,7 +511,7 @@ flowchart LR
     </table>
 
     <h4>PII</h4>
-    <table>
+    <table class="kevin">
       <thead><tr><th>Kevin needs</th><th>Where it appears</th><th>Action</th></tr></thead>
       <tbody>
         <tr><td>Redact member phone number</td><td><code>session_data_feeds.consumer_number</code>, free-text <code>body</code></td><td>Mask before export</td></tr>
