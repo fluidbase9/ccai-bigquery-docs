@@ -106,6 +106,8 @@
     <a href="#value-maps">Value / enum maps</a>
     <a href="#transforms">Transform rules</a>
     <a href="#open-questions">Open questions</a>
+    <h2>Log</h2>
+    <a href="#queue-name-verification">Queue name verification notes</a>
   </nav>
 
   <main>
@@ -980,6 +982,103 @@ CCAI:  escalations[0].fromVirtualAgent.name = "QAT-Voice-Member-Self-Service"
       <li>Required vs optional Webex CC fields with no CCAI source &mdash; defaults?</li>
       <li>Timestamp format, timezone, and duration units expected by the target.</li>
     </ol>
+
+    <!-- ================================================================ -->
+    <h2 id="queue-name-verification">Log: Queue name verification notes</h2>
+    <p class="lead">Cross-system queue-name verification trail &mdash; matching the same interaction across Cisco,
+    CCAI, BigQuery, and Salesforce, plus a false-positive dead end that came up while doing it.</p>
+
+    <h3>The verification chain</h3>
+    <p>Confirming Cisco&rsquo;s <strong>&ldquo;US Membership&rdquo;</strong> queue is the same queue as CCAI&rsquo;s
+    <code>US_MS_General_Chat</code>, by tracing one real interaction across all four systems:</p>
+    <table>
+      <thead><tr><th>System</th><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Google Cloud (BigQuery, QAT env)</td><td><code>selected_menu</code></td><td>&ldquo;Routing Queues/ECOMM General/US_ECOMM_General_CB&rdquo;</td></tr>
+        <tr><td>CCAI (Contact Center AI platform)</td><td>Queue Name</td><td>Routing Queues/Membership/US_MS_General_Chat &ndash; Cascade &ndash; Group 1<br>(CCAI queue name: <code>US_MS_General_Chat</code>; aka Cisco &ldquo;US Membership&rdquo;)</td></tr>
+        <tr><td>CCAI</td><td>Chat ID / Agent</td><td>Chat-4018, agent <strong>Bibiam Martinez</strong></td></tr>
+        <tr><td>Salesforce (UJET Session History)</td><td>Chat ID</td><td>6,104 (UJET-14455)</td></tr>
+        <tr><td>Cisco (Excel export, 07/14/2026)</td><td>PQ Name</td><td><strong>US Membership</strong> (aka CCAI <code>US_MS_General_Chat</code>)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Dead end: <code>US_EN_CTWS_PCS</code></h3>
+    <div class="callout warn">
+      <p>A keyword search of the Cisco Excel export for &ldquo;US Membership&rdquo; / Bibiam Martinez returned one match &mdash;
+      but it was the <strong>wrong record</strong>, matched only because the literal text &ldquo;US Membership&rdquo; happened to
+      appear in that row&rsquo;s <code>Hour</code> column, not the actual queue field.</p>
+    </div>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Unique ID</td><td><code>Daily_Agent_29_20260714-0700_CTWS_5254_51762</code></td></tr>
+        <tr><td>PeripheralNumber</td><td>99148427</td></tr>
+        <tr><td>Agent ID</td><td>51762</td></tr>
+        <tr><td>LOB</td><td>CTWS</td></tr>
+        <tr><td>Date</td><td>2026-07-14</td></tr>
+        <tr><td>PQ ID / Name</td><td>5254 / <code>US_EN_CTWS_PCS</code></td></tr>
+        <tr><td>Team Name</td><td>ALORICA_FtMyer_Team22</td></tr>
+        <tr><td>Agent</td><td>Ans_Butt (Agent ID: 51762) &mdash; <strong>not</strong> Bibiam Martinez &#10060;</td></tr>
+        <tr><td>Hour column text</td><td>&ldquo;US Membership&rdquo; (coincidental string match only)</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Conclusion:</strong> <code>US_EN_CTWS_PCS</code> is an unrelated CTWS-LOB queue and is not part of the
+    Membership/Chat mapping &mdash; the agent mismatch (Ans_Butt vs. Bibiam Martinez) confirms it&rsquo;s a false positive
+    from a loose keyword search, not a real cross-system match. Search should filter on the <code>PQ Name</code> column
+    specifically, not scan every column for the queue-name text.</p>
+
+    <h3>Confirmed Cisco &harr; CCAI queue-name mapping (reference table)</h3>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Cisco queue name</th><th>CCAI queue name</th></tr></thead>
+      <tbody>
+        <tr><td class="todo">NEW</td><td><code>US_MS_Verification</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>US_MS_VerificationTransfer</code></td></tr>
+        <tr><td>US_MS_Transfer, US_MS_Priority</td><td><code>US_MS_Transfer</code></td></tr>
+        <tr><td>US_MS4</td><td><code>US_MS_Supervisor</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>US_MS_General_CB</code></td></tr>
+        <tr><td>US_MS</td><td><code>US_MS_General</code></td></tr>
+        <tr><td><strong>US Membership</strong></td><td><strong><code>US_MS_General_Chat</code></strong></td></tr>
+        <tr><td>US_MS_Privacy</td><td><code>US_MS_Privacy</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>US_ECOMM_VolumeSales</code></td></tr>
+        <tr><td>US_Ecomm_Offline_Support</td><td><code>US_ECOMM_Offline Supervisors</code></td></tr>
+        <tr><td>US_ECOMM_Support</td><td><code>US_ECOMM_Supervisor</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>US_ECOMM_General_CB</code></td></tr>
+        <tr><td>US_ECOMM1</td><td><code>US_ECOMM_General</code></td></tr>
+        <tr><td>US_ECOMM1_Transfer, US_ECOMM1_Priority</td><td><code>US_ECOMM_Transfer</code></td></tr>
+        <tr><td>US_ECOMM5_NH</td><td><code>US_ECOMM_NewHire</code></td></tr>
+        <tr><td>US_ES_EC</td><td><code>US_ECOMM_General_ES</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>US_ECOMM_General_CB_ES</code></td></tr>
+        <tr><td>LGST_3PL_DRIVER</td><td><code>US_LGST_DriverGate</code></td></tr>
+        <tr><td>LGST_COSTCO_EN_PR</td><td><code>PR_LGST_General</code></td></tr>
+        <tr><td>LGST_COSTCO_ES_PR</td><td><code>PR_LGST_General_ES</code></td></tr>
+        <tr><td>LGST_COSTCO_US</td><td><code>US_LGST_General</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>US_LGST_General_CB</code></td></tr>
+        <tr><td>LGST_DRV_GT_EN_PR</td><td><code>PR_LGST_DriverGate</code></td></tr>
+        <tr><td>LGST_DRV_GT_ES_PR</td><td><code>PR_LGST_DriverGate_ES</code></td></tr>
+        <tr><td>LGST_HIGH_RISK_CLAIMS</td><td><code>US_LGST_HighRiskClaims</code></td></tr>
+        <tr><td>US_Nesting_SME</td><td><code>US_ECOMM_Nesting</code></td></tr>
+        <tr><td>US Ecommerce</td><td><code>US_ECOMM_General_Chat</code></td></tr>
+        <tr><td>US_BD</td><td><code>US_BD_General</code></td></tr>
+        <tr><td class="todo">&mdash;</td><td><code>US_BD_General_Chat</code></td></tr>
+        <tr><td class="todo">&mdash;</td><td><code>US_BD_Transfer_Chat</code></td></tr>
+        <tr><td class="todo">&mdash;</td><td><code>US_ECOMM_Transfer_Chat</code></td></tr>
+        <tr><td class="todo">&mdash;</td><td><code>US_MS_Transfer_Chat</code></td></tr>
+        <tr><td>OPST - Cancel/Fraud</td><td><code>Internal_OPST_Chat</code></td></tr>
+        <tr><td>Logistics Damage Claims</td><td><code>Internal_CL_Claims_Chat</code></td></tr>
+        <tr><td>Support Line Chat</td><td><code>Internal_Ecomm_SupportLine_Chat</code></td></tr>
+        <tr><td>T2 SOK</td><td><code>Internal_T2_SOK_Chat</code></td></tr>
+        <tr><td>UPS/FedEx Grocery</td><td><code>Internal_T2_Redirect_Chat</code></td></tr>
+        <tr><td>Costco Logistics</td><td><code>Internal_T2_Logistics_Chat</code></td></tr>
+        <tr><td>Orlando Management</td><td><code>Internal_Logistics_SupportLine_Chat</code></td></tr>
+        <tr><td>Yakima SME Chat</td><td><code>Internal_SME_Chat</code></td></tr>
+        <tr><td>Ecom T2 Sup Chat</td><td><code>Internal_Ecomm_T2_SupportLine_Chat</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>Internal_MS_SupportLine_Chat</code></td></tr>
+        <tr><td class="todo">NEW</td><td><code>Internal_MS_Verification_Chat</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="color:var(--muted);font-size:12.5px;">Source: user&rsquo;s personal &ldquo;Queue Name verification 2&rdquo; notes, cross-referencing Google Cloud/BigQuery (QAT env), CXinsights, CCAI, Salesforce, and a Cisco Excel export dated 07/14/2026. &ldquo;NEW&rdquo; rows have no confirmed Cisco-side name yet.</p>
 
   </main>
 </div>
