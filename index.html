@@ -26,6 +26,8 @@
     h1 { margin-top:0; font-size:30px; }
     h2 { margin-top:2.6em; padding-bottom:.3em; border-bottom:1px solid var(--border); font-size:22px; }
     h3 { margin-top:1.8em; font-size:17px; }
+    h3.section-title-big { font-size:26px; margin-top:0; }
+    hr.section-sep { border:none; border-top:2px solid var(--border); margin:2.6em 0; }
     h4 { margin:1.4em 0 .4em; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
     p.lead { color:var(--muted); font-size:17px; }
     .step { display:inline-block; background:var(--accent); color:#fff; font-size:12px; font-weight:600;
@@ -371,7 +373,8 @@ flowchart LR
     </ol>
 
     <!-- ---------------------------------------------------------------- -->
-    <h3 id="kevin-wants">What Kevin actually wants &mdash; CCAI side vs Cisco side</h3>
+    <hr class="section-sep">
+    <h3 id="kevin-wants" class="section-title-big">What Kevin actually wants &mdash; CCAI side vs Cisco side</h3>
     <p>One row per attribute/measure Kevin asked for. <strong>CCAI (BigQuery)</strong> = column in
     <code>ccaas_raw_lab.metadata_current</code> (or a derivation from it). <strong>Cisco</strong> = column in the
     <code>SummaryDaily Reports</code> export. <span class="todo">italic grey</span> = not available on that side.</p>
@@ -540,6 +543,8 @@ CCAI:  escalations[0].fromVirtualAgent.name = "QAT-Voice-Member-Self-Service"
       </tbody>
     </table>
     </div>
+
+    <hr class="section-sep">
 
     <h3>Cross-cutting requirements</h3>
     <ul>
